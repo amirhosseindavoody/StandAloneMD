@@ -1,0 +1,5 @@
+C:\Amirhossein\StandAloneMD\StandAloneMD\bin\Debug\StandAloneMD.exe
+C:\Amirhossein\StandAloneMD\StandAloneMD\bin\Debug\StandAloneMD.pdb
+C:\Amirhossein\StandAloneMD\StandAloneMD\obj\x86\Debug\StandAloneMD.csprojResolveAssemblyReference.cache
+C:\Amirhossein\StandAloneMD\StandAloneMD\obj\x86\Debug\StandAloneMD.exe
+C:\Amirhossein\StandAloneMD\StandAloneMD\obj\x86\Debug\StandAloneMD.pdb
