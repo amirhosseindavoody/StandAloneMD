@@ -31,7 +31,6 @@ namespace StandAloneMD
 
 		public void PreCompute ()
 		{
-
 			//the min sigma value and max sigma value are used for precalculating LJ forces.
 			Atom[] atomTemplate = new Atom[numAtomTypes];
         	atomTemplate[0] = new Copper();
@@ -69,8 +68,7 @@ namespace StandAloneMD
 				Atom.AllAtoms.Remove(atomTemplate[i]);
 			}
 
-			// precalculate the LennardJones potential and store it in preLennarJones list.
-
+			// precalculate the LennardJones potential and store it in preLennarJones array.
 			int nR = (int)(StaticVariables.cutoff/StaticVariables.deltaR)+1;
 			StaticVariables.preLennardJones = new float[nR];
 
@@ -126,7 +124,6 @@ namespace StandAloneMD
 			for (int i = 0; i < numAtoms; i++)
 			{
 				Atom currAtom = new Copper();
-            	//Atom.AllAtoms.Add(currAtom);
 				currAtom.velocity = new float[] { randomFloat(-1.0f, +1.0f), randomFloat(-1.0f, +1.0f), randomFloat(-1.0f, +1.0f)};
 				currAtom.position = new float[] { randomFloat(0.0f, depth), randomFloat(0.0f, width), randomFloat(0.0f, height) };
 			}	

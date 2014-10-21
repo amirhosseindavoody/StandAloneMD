@@ -23,6 +23,7 @@ namespace StandAloneMD
 	{
 		//this is the molecular dynamic simulation timestep
     	public static float MDTimestep = 5.0f * (float) Math.Pow (10, -15);
+		public static float MDTimestepSqr = MDTimestep * MDTimestep;
     	public static float fixedDeltaTime = MDTimestep;
 
     	//this variable keeps track of the amount of simulation time that has passed

@@ -39,13 +39,7 @@ namespace StandAloneMD
 
 		public float[] velocity = new float[3]{0.0f, 0.0f, 0.0f};
 		public float[] position = new float[3]{0.0f, 0.0f, 0.0f};
-
-
-		//variables for computing the forces on atoms
-		private float[] lastVelocity = new float[3]{0.0f, 0.0f, 0.0f};
-		private float[] a_n = new float[3]{0.0f, 0.0f, 0.0f};
-		private float[] a_nPlus1 = new float[3]{0.0f, 0.0f, 0.0f};
-
+		public float[] acceleration = new float[3] {0.0f, 0.0f, 0.0f};
 
 		public Atom()
 		{

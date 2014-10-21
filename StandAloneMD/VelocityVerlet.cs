@@ -15,6 +15,52 @@ namespace StandAloneMD
 		public VelocityVerlet ()
 		{
 		}
+
+		public void timeForward()
+		{
+			// update the position of all atoms then initialize the acceleration to be updated
+			for (int i=0; i< Atom.AllAtoms.Count; i++) {
+				Atom currAtom = Atom.AllAtoms[i];
+				currAtom.position = currAtom.position + currAtom.velocity * StaticVariables.MDTimestep + 0.5f * StaticVariables.MDTimestepSqr * currAtom.acceleration;
+
+			}
+
+			// update the forces on all atoms
+			for (int i=0; i< Atom.AllAtoms.Count-1; i++) {
+				Atom firstAtom = Atom.AllAtoms[i];
+				for (int j=i+1; j<Atom.AllAtoms.Count; j++) {
+					Atom secondAtom = Atom.AllAtoms[j];
+
+
+
+				}
+			}
+		}
+
+		//the function returns the Lennard-Jones force on the atom given the list of all the atoms in the simulation
+		void GetLennardJonesForce(Atom firstAtom, Atom secondAtom)
+		{
+			float[] finalForce = new float[3]{0.0f, 0.0f, 0.0f};
+
+			float[] deltaR = firstAtom.position - secondAtom.position;
+			float distanceSqr = (float)Math.Sqrt(deltaR[0] * deltaR[0] + deltaR[1] *deltaR[1] + deltaR[2] * deltaR[2]);
+			float finalSigma = StaticVariables.sigmaValues [firstAtom.atomID, secondAtom.atomID];
+			float normDistanceSqr = distanceSqr / finalSigma / finalSigma;
+				
+			//only get the forces of the atoms that are within the cutoff range
+			if (normDistanceSqr <= StaticVariables.cutoffSqr) 
+			{
+				int iR = (int) ((float)Math.Sqrt(normDistanceSqr)/(StaticVariables.deltaR));
+				float magnitude = StaticVariables.preLennardJones[iR];
+				magnitude = magnitude * 48.0f * epsilon / StaticVariables.angstromsToMeters/ finalSigma / finalSigma;
+				finalForce += deltaR * magnitude;
+			}
+			
+			float[] adjustedForce = finalForce / StaticVariables.mass100amuToKg;
+			adjustedForce = adjustedForce / StaticVariables.angstromsToMeters;
+			adjustedForce = adjustedForce ;
+			return adjustedForce;
+		}
 	}
 }
 
