@@ -12,47 +12,60 @@
 using System.Collections;
 using System;
 
-public class Gold : Atom
+namespace StandAloneMD
 {
-	public override String atomName { 
-		get{ return "Gold"; } 
-	}
+	public class Gold : Atom
+	{
+		public override String atomName
+		{ 
+			get{ return "Gold"; } 
+		}
 
-	public override int atomID {
-		get{ return 1;}
-	}
+		public override int atomID
+		{
+			get{ return 1;}
+		}
 	
-	public override float epsilon {
-		get { return 5152.9f * 1.381f * (float)Math.Pow (10, -23); } // J
-	}
+		public override float epsilon 
+		{
+			get { return 5152.9f * 1.381f * (float)Math.Pow (10, -23); } // J
+		}
 	
-	public override float sigma {
-		get { return 2.6367f; }
-	}
+		public override float sigma 
+		{
+			get { return 2.6367f; }
+		}
 	
-	protected override float massamu {
-		get { return 196.967f; } //amu
-	}
+		protected override float massamu 
+		{
+			get { return 196.967f; } //amu
+		}
 
-	// We assume gold to play the role of chloride
-	public override float buck_A {
-		get { return 405774.0f*1.6f* (float)Math.Pow(10,-19); } //units of [J]
-	}
+		// We assume gold to play the role of chloride
+		public override float buck_A 
+		{
+			get { return 405774.0f*1.6f* (float)Math.Pow(10,-19); } //units of [J]
+		}
 	
-	public override float buck_B {
-		get { return 4.207408f; } //units of [1/Angstrom]
-	}
+		public override float buck_B 
+		{
+			get { return 4.207408f; } //units of [1/Angstrom]
+		}
 	
-	public override float buck_C {
-		get { return 72.4f*1.6f* (float)Math.Pow(10,-19); } //units of [J.Anstrom^6]
-	}
+		public override float buck_C 
+		{
+			get { return 72.4f*1.6f* (float)Math.Pow(10,-19); } //units of [J.Anstrom^6]
+		}
 	
-	public override float buck_D {
-		get { return 145.425f*1.6f* (float)Math.Pow(10,-19); } //units of [J.Angstrom^8]
-	}
+		public override float buck_D 
+		{
+			get { return 145.425f*1.6f* (float)Math.Pow(10,-19); } //units of [J.Angstrom^8]
+		}
 	
-	public override float Q_eff {
-		get { return -1.0f*1.6f* (float)Math.Pow(10,-19); } //units of Coulomb
+		public override float Q_eff 
+		{
+			get { return -1.0f*1.6f* (float)Math.Pow(10,-19); } //units of Coulomb
+		}
 	}
 }
 

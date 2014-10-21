@@ -43,6 +43,7 @@
     <Compile Include="Atom.cs" />
     <Compile Include="Platinum.cs" />
     <Compile Include="StaticVariables.cs" />
+    <Compile Include="VelocityVerlet.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

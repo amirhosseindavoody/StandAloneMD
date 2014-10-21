@@ -9,8 +9,9 @@ namespace StandAloneMD
             CreateEnvironment environment = new CreateEnvironment();
             Console.WriteLine("Number of atoms = " + environment.numAtoms);
 
-            environment.PreCompute();
-            environment.InitAtoms();
+            environment.PreCompute ();
+            environment.InitAtoms ();
+			environment.printAtomList ();
 
 		}
 	}

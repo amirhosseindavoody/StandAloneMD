@@ -16,40 +16,50 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-public abstract class Atom
+namespace StandAloneMD
 {
+	public abstract class Atom
+	{
 
-    //this is a list of all atoms
-	protected static List<Atom> m_AllAtoms = new List<Atom> ();
+    	//this is a list of all atoms
+		protected static List<Atom> m_AllAtoms = new List<Atom> ();
 
-	//variables that must be implemented because they are declared as abstract in the base class
-	public abstract float epsilon{ get; } // J
-	public abstract float sigma { get; }
-	protected abstract float massamu{ get; } //amu
-	public abstract String atomName { get; }
-	public abstract int atomID { get;}
+		//variables that must be implemented because they are declared as abstract in the base class
+		public abstract float epsilon{ get; } // J
+		public abstract float sigma { get; }
+		protected abstract float massamu{ get; } //amu
+		public abstract String atomName { get; }
+		public abstract int atomID { get;}
 
-	public abstract float buck_A { get; } // Buckingham potential coefficient
-	public abstract float buck_B { get; } // Buckingham potential coefficient
-	public abstract float buck_C { get; } // Buckingham potential coefficient
-	public abstract float buck_D { get; } // Buckingham potential coefficient
-	public abstract float Q_eff { get; } // Ion effective charge for use in Buckingham potential
+		public abstract float buck_A { get; } // Buckingham potential coefficient
+		public abstract float buck_B { get; } // Buckingham potential coefficient
+		public abstract float buck_C { get; } // Buckingham potential coefficient
+		public abstract float buck_D { get; } // Buckingham potential coefficient
+		public abstract float Q_eff { get; } // Ion effective charge for use in Buckingham potential
 
-    public float[] velocity = new float[3];
-    public float[] position = new float[3];
+		public float[] velocity = new float[3]{0.0f, 0.0f, 0.0f};
+		public float[] position = new float[3]{0.0f, 0.0f, 0.0f};
 
 
-	//variables for computing the forces on atoms
-	private float[] lastVelocity = new float[3];
-	private float[] a_n = new float[3];
-	private float[] a_nPlus1 = new float[3];
+		//variables for computing the forces on atoms
+		private float[] lastVelocity = new float[3]{0.0f, 0.0f, 0.0f};
+		private float[] a_n = new float[3]{0.0f, 0.0f, 0.0f};
+		private float[] a_nPlus1 = new float[3]{0.0f, 0.0f, 0.0f};
 
-	// method to extract the list of allMolecules
-	public static List<Atom> AllAtoms { 
-		get {
-			return m_AllAtoms;
+
+		public Atom()
+		{
+			m_AllAtoms.Add(this);
 		}
-	}
+
+
+		// method to extract the list of allMolecules
+		public static List<Atom> AllAtoms { 
+			get
+			{
+				return m_AllAtoms;
+			}
+		}
 
     /*
     
@@ -115,5 +125,6 @@ public abstract class Atom
 	}
 
     */
+	}
 }
 
