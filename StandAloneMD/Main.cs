@@ -6,8 +6,12 @@ namespace StandAloneMD
 	{
 		public static void Main (string[] args)
 		{
-			Console.WriteLine ("Hello World!");
-			Console.ReadLine ();
+            CreateEnvironment environment = new CreateEnvironment();
+            Console.WriteLine("Number of atoms = " + environment.numAtoms);
+
+            environment.PreCompute();
+            environment.InitAtoms();
+
 		}
 	}
 }

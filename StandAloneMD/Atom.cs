@@ -20,7 +20,7 @@ public abstract class Atom
 {
 
     //this is a list of all atoms
-	protected static List<Atom> m_AllMolecules = new List<Atom> ();
+	protected static List<Atom> m_AllAtoms = new List<Atom> ();
 
 	//variables that must be implemented because they are declared as abstract in the base class
 	public abstract float epsilon{ get; } // J
@@ -36,57 +36,22 @@ public abstract class Atom
 	public abstract float Q_eff { get; } // Ion effective charge for use in Buckingham potential
 
     public float[] velocity = new float[3];
+    public float[] position = new float[3];
 
 
 	//variables for computing the forces on atoms
 	private float[] lastVelocity = new float[3];
 	private float[] a_n = new float[3];
-	private float[] a_nplus1 = new float[3];
+	private float[] a_nPlus1 = new float[3];
 
 	// method to extract the list of allMolecules
-	public static List<Atom> AllMolecules { 
+	public static List<Atom> AllAtoms { 
 		get {
-			return m_AllMolecules;
+			return m_AllAtoms;
 		}
 	}
 
     /*
-	void FixedUpdate(){
-
-	    float[] force = new float [3];
-
-			if(StaticVariables.currentPotential == StaticVariables.Potential.LennardJones){
-				force = GetLennardJonesForce (m_AllMolecules);
-			}
-			else if(StaticVariables.currentPotential == StaticVariables.Potential.Brenner){
-				force = GetLennardJonesForce (m_AllMolecules);
-			}
-			else{
-				force = GetBuckinghamForce (m_AllMolecules);
-			}
-
-
-			//scale the velocity based on the temperature of the system
-			if ((rigidbody.velocity.magnitude != 0) && !rigidbody.isKinematic && !float.IsInfinity(TemperatureCalc.squareRootAlpha) && m_AllMolecules.Count > 1) {
-				Vector3 newVelocity = gameObject.rigidbody.velocity * TemperatureCalc.squareRootAlpha;
-				gameObject.rigidbody.velocity = newVelocity;
-			}
-
-		}
-		else{
-			//zero out all of the velocities of all of the atoms when time is stopped
-			for(int i = 0; i < m_AllMolecules.Count; i++){
-				Atom currAtom = m_AllMolecules[i];
-				if(!currAtom.rigidbody.isKinematic){
-					currAtom.rigidbody.velocity = Vector3.zero;
-				}
-			}
-		}
-
-
-
-	}
-
     
 	//the function returns the Lennard-Jones force on the atom given the list of all the atoms in the simulation
 	Vector3 GetLennardJonesForce(List<Atom> objectsInRange){
