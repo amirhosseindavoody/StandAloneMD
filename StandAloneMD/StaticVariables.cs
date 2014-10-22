@@ -22,7 +22,7 @@ namespace StandAloneMD
 	public class StaticVariables 
 	{
 		//this is the molecular dynamic simulation timestep
-    	public static float MDTimestep = 5.0f * (float) Math.Pow (10, -15);
+    	public static float MDTimestep = 0.5f * (float) Math.Pow (10, -15);
 		public static float MDTimestepSqr = MDTimestep * MDTimestep;
     	public static float fixedDeltaTime = MDTimestep;
 
@@ -52,10 +52,10 @@ namespace StandAloneMD
 		public static float cutoffSqr = cutoff * cutoff;
 
 		//The mesh size for pre-calculating Lennard Jones force.
-		public static float deltaR = 0.05f; 
+		public static float deltaR = 0.005f; 
 
-		//This array holds the pre-calculated value of LennardJones potential for some sample points.
-		public static float[] preLennardJones;
+		
+		
 
 		//When r_ij is small, the Lennard-Jones potential is extremely large.
 		//At a certain r_min, we will substitute the L-J potential with a function that
@@ -69,11 +69,17 @@ namespace StandAloneMD
 		public static float tempRangeLow = 0.01f;
 		public static float tempRangeHigh = 5000.0f; 
 
-		//access to sigma values by appending the two atomNames together e.g. "CopperCopper" or "CopperGold" etc
-		//public static Dictionary<String, float> sigmaValues = new Dictionary<String, float> ();
-		public static float[,] sigmaValues = new float[3,3];
+        //Potential Energy
+        public static float PotentialEnergy = 0.0f;
+        //Kinetic Energy
+        public static float KineticEnergy = 0.0f;
 
-		//access to coefficients in Buckingham potential by appending the two atomNames together e.g. "CopperCopper" or "CopperGold" etc
+		//pre-calculated coefficients and forces for Lennard-Jones potential
+		public static float[,] sigmaValues = new float[3,3];
+        public static float[,] accelCoefficient = new float[3, 3]; // this is the coefficient that is multiplied by the preLennardJones vector to get the acceleration of each atom for each combinations
+        public static float[] preLennardJones; //This is the pre-calculated value of LennardJones potential for some mesh points.
+
+        //pre-calculated coefficients and forces for Buckingham potential
 		public static float[,] coeff_A = new float[3, 3];
     	public static float[,] coeff_B = new float[3, 3];
     	public static float[,] coeff_C = new float[3, 3];

@@ -1,0 +1,45 @@
+%%
+close all;
+clear all;
+clc;
+fig = 0;
+
+%%
+filename = 'C:\Amirhossein\StandAloneMD\StandAloneMD\bin\Debug\force.txt';
+ra = load (filename);
+
+numAtom = 2;
+nTime = size(position,1)/numAtom;
+
+Max = max(position,1);
+Min = min(position,1);
+
+fig = fig+1; figure(fig);
+for iT = 1 : nTime
+    iT
+    plot(position((iT-1)*numAtom+1,1),position((iT-1)*numAtom+1,2),'b*'); hold on;
+    plot(position((iT-1)*numAtom+2,1),position((iT-1)*numAtom+2,2),'r*'); hold off;
+    xlim([-2,15]);
+    ylim([-0.5,0.5]);
+    pause;
+end;
+
+%%
+filename = 'C:\Amirhossein\StandAloneMD\StandAloneMD\bin\Debug\position.txt';
+position = load (filename);
+
+numAtom = 2;
+nTime = size(position,1)/numAtom;
+
+Max = max(position,1);
+Min = min(position,1);
+
+fig = fig+1; figure(fig);
+for iT = 1 : nTime
+    iT
+    plot(position((iT-1)*numAtom+1,1),position((iT-1)*numAtom+1,2),'b*'); hold on;
+    plot(position((iT-1)*numAtom+2,1),position((iT-1)*numAtom+2,2),'r*'); hold off;
+    xlim([-2,15]);
+    ylim([-0.5,0.5]);
+    pause;
+end;

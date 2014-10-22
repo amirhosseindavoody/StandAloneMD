@@ -9,8 +9,9 @@
  * 
  **/
 
-using System.Collections;
 using System;
+using System.Collections;
+
 
 namespace StandAloneMD
 {
@@ -36,7 +37,7 @@ namespace StandAloneMD
 			get { return 2.6367f; }
 		}
 	
-		protected override float massamu 
+		public override float massamu 
 		{
 			get { return 196.967f; } //amu
 		}

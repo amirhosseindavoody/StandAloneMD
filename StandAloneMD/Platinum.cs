@@ -36,7 +36,7 @@ namespace StandAloneMD
 			get { return 2.5394f; }
 		}
 	
-		protected override float massamu 
+		public override float massamu 
 		{
 			get { return 195.084f; } //amu
 		}

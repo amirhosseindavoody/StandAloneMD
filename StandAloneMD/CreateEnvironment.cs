@@ -11,11 +11,11 @@
  * access and debugging. 
  * 
  * 
- **/ 
+ **/
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System;
 
 namespace StandAloneMD
 {
@@ -23,11 +23,11 @@ namespace StandAloneMD
 	{
 		public int numAtoms = 10;
     	private int numAtomTypes = 3;
-		public float width = 100.0f;
-		public float height = 100.0f;
-		public float depth = 100.0f;
+		public float width = 10.0f;
+		public float height = 10.0f;
+		public float depth = 10.0f;
 		public float volume;
-		private Random rnd = new Random();	
+		private Random rnd = new Random();
 
 		public void PreCompute ()
 		{
@@ -47,6 +47,10 @@ namespace StandAloneMD
 
 					float currentSigma = (float)Math.Sqrt(firstAtom.sigma*secondAtom.sigma);
 					StaticVariables.sigmaValues[firstAtom.atomID,secondAtom.atomID] = currentSigma;
+
+                    // when the pre-calculated normalized Lennard Jones force is multiplied by this coefficient the acceleration units is [Angstrom/second^2]
+                    float currentAccelCoeff = 48.0f * firstAtom.epsilon / (currentSigma * currentSigma * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters * firstAtom.massamu * StaticVariables.amuToKg);
+                    StaticVariables.accelCoefficient[firstAtom.atomID, secondAtom.atomID] = currentAccelCoeff;
 
 					float currentA = (float)Math.Sqrt(firstAtom.buck_A*secondAtom.buck_A);
 					StaticVariables.coeff_A[firstAtom.atomID,secondAtom.atomID] = currentA;
@@ -72,17 +76,18 @@ namespace StandAloneMD
 			int nR = (int)(StaticVariables.cutoff/StaticVariables.deltaR)+1;
 			StaticVariables.preLennardJones = new float[nR];
 
-			for (int i = 0; i < nR; i++)
+			for (int i = 1; i < nR; i++)
 			{
 				float distance = (float)i * StaticVariables.deltaR;
-				float magnitude = CalcLennardJonesForce (distance);
+				float magnitude = calcLennardJonesForce (distance);
 				StaticVariables.preLennardJones[i] = magnitude;
 			}
+            StaticVariables.preLennardJones[0] = StaticVariables.preLennardJones[1];
 
 		}
 
     	//the function returns the LennarJones force on the atom given the list of the atoms that are within range of it
-    	private float CalcLennardJonesForce(float distance)
+    	private float calcLennardJonesForce(float distance)
     	{
         	float invDistance2 = 1.0f / distance / distance;
         	float invDistance6 = invDistance2 * invDistance2 * invDistance2;
@@ -113,6 +118,7 @@ namespace StandAloneMD
             	float part2 = magnitude_Vmax - magnitude_Vmin;
             	forceMagnitude = magnitude_Vmax - (part1 * part2);
         	}
+            
         	return forceMagnitude;
     	}
 
@@ -124,8 +130,10 @@ namespace StandAloneMD
 			for (int i = 0; i < numAtoms; i++)
 			{
 				Atom currAtom = new Copper();
-				currAtom.velocity = new float[] { randomFloat(-1.0f, +1.0f), randomFloat(-1.0f, +1.0f), randomFloat(-1.0f, +1.0f)};
+				//currAtom.velocity = new float[] { randomFloat(-1.0f, +1.0f), randomFloat(-1.0f, +1.0f), randomFloat(-1.0f, +1.0f)};
 				currAtom.position = new float[] { randomFloat(0.0f, depth), randomFloat(0.0f, width), randomFloat(0.0f, height) };
+                currAtom.velocity = new float[] { 0.0f, 0.0f, 0.0f };
+                //currAtom.position = new float[] { -1.23219f * currAtom.sigma / 2.0f + (float)i * 1.23219f * currAtom.sigma, 0.0f, 0.0f };
 			}	
 		}
 
@@ -136,7 +144,8 @@ namespace StandAloneMD
         	return rndFloat;
     	}
 
-    	public void printAtomList()
+    	// print a list of atoms to the console
+        public void printAtomList()
     	{
         	Console.WriteLine("Total number of created atoms = " + Atom.AllAtoms.Count);
         	for (int i = 0; i < Atom.AllAtoms.Count; i++)

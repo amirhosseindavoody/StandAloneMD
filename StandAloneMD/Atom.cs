@@ -12,9 +12,9 @@
 //Pt: 7184.2, 7908.7, 2.5394, 165.084, 8.254, 3.920, 2.77
 
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System;
 
 namespace StandAloneMD
 {
@@ -27,7 +27,7 @@ namespace StandAloneMD
 		//variables that must be implemented because they are declared as abstract in the base class
 		public abstract float epsilon{ get; } // J
 		public abstract float sigma { get; }
-		protected abstract float massamu{ get; } //amu
+		public abstract float massamu{ get; } //amu
 		public abstract String atomName { get; }
 		public abstract int atomID { get;}
 
@@ -39,7 +39,8 @@ namespace StandAloneMD
 
 		public float[] velocity = new float[3]{0.0f, 0.0f, 0.0f};
 		public float[] position = new float[3]{0.0f, 0.0f, 0.0f};
-		public float[] acceleration = new float[3] {0.0f, 0.0f, 0.0f};
+		public float[] accelerationNew = new float[3] {0.0f, 0.0f, 0.0f};
+        public float[] accelerationOld = new float[3] { 0.0f, 0.0f, 0.0f };
 
 		public Atom()
 		{
