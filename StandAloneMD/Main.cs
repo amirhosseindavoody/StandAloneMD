@@ -13,7 +13,7 @@ namespace StandAloneMD
             environment.PreCompute ();
             environment.InitAtoms ();
 
-            float totalTime = 20.0f * (float) Math.Pow (10,-12);
+            float totalTime = 100.0f * (float) Math.Pow (10,-12);
             int iTime = 0;
             int writeFlag = 01;
 
@@ -34,6 +34,7 @@ namespace StandAloneMD
                     iTime++;
                     writeFlag--;
 
+                    /*
                     if (writeFlag == 0)
                     {
                         writeFlag = 100;
@@ -42,6 +43,7 @@ namespace StandAloneMD
                             file.WriteLine(Atom.AllAtoms[i].position[0] + "    " + Atom.AllAtoms[i].position[1] + "    " + Atom.AllAtoms[i].position[2]);
                         }
                     }
+                    */
 
                     Console.WriteLine("iTime = " + iTime + "            Current Time = " + StaticVariables.currentTime);
 

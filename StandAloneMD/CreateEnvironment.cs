@@ -21,7 +21,7 @@ namespace StandAloneMD
 {
 	public class CreateEnvironment
 	{
-		public int numAtoms = 10;
+		public int numAtoms = 100;
     	private int numAtomTypes = 3;
 		public float width = 10.0f;
 		public float height = 10.0f;

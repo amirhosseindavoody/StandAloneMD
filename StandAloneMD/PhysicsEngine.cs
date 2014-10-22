@@ -82,11 +82,13 @@ namespace StandAloneMD
         {
             for (int i = 0; i < Atom.AllAtoms.Count; i++)
             {
+                /*
                 Atom currAtom = Atom.AllAtoms[i];
                 for (int idx = 0; idx < 3; idx++)
                 {
                     currAtom.position[idx] = currAtom.position[idx] + currAtom.velocity[idx] * StaticVariables.MDTimestep + 0.5f * StaticVariables.MDTimestepSqr * currAtom.accelerationNew[idx];
                 }
+                */
             }
 
         }
