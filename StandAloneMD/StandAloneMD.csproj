@@ -35,7 +35,6 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CalculateEnergy.cs" />
     <Compile Include="Matrix.cs" />
     <Compile Include="Copper.cs" />
     <Compile Include="CreateEnvironment.cs" />

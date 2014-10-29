@@ -35,7 +35,7 @@ namespace StandAloneMD
 				Atom firstAtom = Atom.AllAtoms[i];
 				for (int j=i+1; j<Atom.AllAtoms.Count; j++) {
 					Atom secondAtom = Atom.AllAtoms[j];
-                    GetLennardJonesForce(firstAtom, secondAtom);
+                    getLennardJonesForce(firstAtom, secondAtom);
 				}
 			}
 
@@ -46,12 +46,13 @@ namespace StandAloneMD
                 for (int idx = 0; idx < 3; idx++)
                 {
                     currAtom.velocity[idx] = currAtom.velocity[idx] + 0.5f * (currAtom.accelerationOld[idx] + currAtom.accelerationNew[idx]) * StaticVariables.MDTimestep;
+                    currAtom.velocity[idx] = currAtom.velocity[idx] * StaticVariables.sqrtAlpha;
                 }
             }
 		}
 
 		//the function returns the Lennard-Jones force on the atom given the list of all the atoms in the simulation
-		private static void GetLennardJonesForce(Atom firstAtom, Atom secondAtom)
+		private static void getLennardJonesForce(Atom firstAtom, Atom secondAtom)
 		{
 			float[] firstAtomAcceleration = new float[3];
             float[] secondAtomAcceleration = new float[3];
@@ -71,26 +72,119 @@ namespace StandAloneMD
 				int iR = (int) ((float)Math.Sqrt(normDistanceSqr)/(StaticVariables.deltaR));
                 for (int idx = 0; idx < 3; idx++)
                 {
-                    firstAtom.accelerationNew[idx] = firstAtom.accelerationNew[idx] + StaticVariables.preLennardJones[iR] * StaticVariables.accelCoefficient[firstAtom.atomID,secondAtom.atomID] * deltaR[idx];
-                    secondAtom.accelerationNew[idx] = secondAtom.accelerationNew[idx] - StaticVariables.preLennardJones[iR] * StaticVariables.accelCoefficient[secondAtom.atomID, firstAtom.atomID] * deltaR[idx];
+                    firstAtom.accelerationNew[idx] = firstAtom.accelerationNew[idx] + StaticVariables.preLennardJonesForce[iR] * StaticVariables.accelCoefficient[firstAtom.atomID,secondAtom.atomID] * deltaR[idx];
+                    secondAtom.accelerationNew[idx] = secondAtom.accelerationNew[idx] - StaticVariables.preLennardJonesForce[iR] * StaticVariables.accelCoefficient[secondAtom.atomID, firstAtom.atomID] * deltaR[idx];
                 }
 			}
 		}
 
         //reflect the atoms from the walls
+        
         public static void ReflectFromWalls()
         {
+            float[] boxDimension = new float[3] {StaticVariables.myEnvironment.depth, StaticVariables.myEnvironment.width , StaticVariables.myEnvironment.height};
+            
             for (int i = 0; i < Atom.AllAtoms.Count; i++)
             {
-                /*
                 Atom currAtom = Atom.AllAtoms[i];
                 for (int idx = 0; idx < 3; idx++)
                 {
-                    currAtom.position[idx] = currAtom.position[idx] + currAtom.velocity[idx] * StaticVariables.MDTimestep + 0.5f * StaticVariables.MDTimestepSqr * currAtom.accelerationNew[idx];
+                    float sign = Math.Sign(currAtom.position[idx]);
+                    float firstRemainder = ((Math.Abs(currAtom.position[idx]) + boxDimension[idx]/2.0f) % (2.0f * boxDimension[idx]));
+                    if (firstRemainder < boxDimension[idx])
+                    {
+                        currAtom.position[idx] = firstRemainder - boxDimension[idx] / 2.0f;
+                        currAtom.velocity[idx] = currAtom.velocity[idx];
+                    }
+                    else
+                    {
+                        currAtom.position[idx] = 3.0f * boxDimension[idx] / 2.0f - firstRemainder;
+                        currAtom.velocity[idx] = -1.0f * currAtom.velocity[idx];
+                    }
+                    currAtom.position[idx] = sign * currAtom.position[idx];
                 }
-                */
+                
+            }
+        }
+
+        public static void CalculateEnergy()
+        {
+            StaticVariables.potentialEnergy = 0.0f;
+            StaticVariables.kineticEnergy = 0.0f;
+            StaticVariables.currentTemperature = 0.0f;
+
+            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
+            {
+                Atom firstAtom = Atom.AllAtoms[i];
+                
+                // calculate kinetic energy of each atom
+                float velocitySqr = firstAtom.velocity[0] * firstAtom.velocity[0] + firstAtom.velocity[1] * firstAtom.velocity[1] + firstAtom.velocity[2] * firstAtom.velocity[2];
+                StaticVariables.kineticEnergy += 0.5f * firstAtom.massamu * StaticVariables.amuToKg * velocitySqr * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters;
+
+                // calculate potential energy between each pair of atoms
+                for (int j = i + 1; j < Atom.AllAtoms.Count; j++)
+                {
+                    Atom secondAtom = Atom.AllAtoms[j];
+                    StaticVariables.potentialEnergy += getLennardJonesPotential(firstAtom, secondAtom);
+                }
             }
 
+            StaticVariables.currentTemperature = StaticVariables.kineticEnergy / 1.5f / (float)Atom.AllAtoms.Count / StaticVariables.kB;
+            calculateSqrtAlpha();
+
+        }
+
+        //the function returns the Lennard-Jones force on the atom given the list of all the atoms in the simulation
+        private static float getLennardJonesPotential(Atom firstAtom, Atom secondAtom)
+        {
+            float potential = 0.0f;
+            float[] deltaR = new float[3];
+            for (int idx = 0; idx < 3; idx++)
+            {
+                deltaR[idx] = firstAtom.position[idx] - secondAtom.position[idx];
+            }
+            float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
+            float finalSigma = StaticVariables.sigmaValues[firstAtom.atomID, secondAtom.atomID];
+            float normDistanceSqr = distanceSqr / finalSigma / finalSigma; // this is normalized distanceSqr to the sigmaValue
+
+            //only get the forces of the atoms that are within the cutoff range
+            if (normDistanceSqr <= StaticVariables.cutoffSqr)
+            {
+                int iR = (int)((float)Math.Sqrt(normDistanceSqr) / (StaticVariables.deltaR));
+                potential = 4.0f * firstAtom.epsilon * StaticVariables.preLennardJonesPotential[iR];
+            }
+            return potential;
+        }
+
+        private static void calculateSqrtAlpha()
+        {
+            float alpha = StaticVariables.desiredTemperature / StaticVariables.currentTemperature;
+            float draggedAlpha = 0.0f;
+            float draggedTemperature = 0.0f;
+
+            if (StaticVariables.currentTemperature < 0.000000000001f)
+            {
+                draggedAlpha = 1.0f;
+            }
+            else if (StaticVariables.currentTemperature > 5000.0f)
+            {
+                draggedAlpha = alpha;
+            }
+            else if (alpha > 1)
+            {
+                draggedTemperature = (StaticVariables.desiredTemperature - StaticVariables.currentTemperature) * StaticVariables.alphaDrag + StaticVariables.currentTemperature;
+                draggedAlpha = draggedTemperature / StaticVariables.currentTemperature;
+            }
+            else if (alpha < 1)
+            {
+                draggedTemperature = StaticVariables.currentTemperature - ((StaticVariables.currentTemperature - StaticVariables.desiredTemperature) * StaticVariables.alphaDrag);
+                draggedAlpha = draggedTemperature / StaticVariables.currentTemperature;
+            }
+            else
+            {
+                draggedAlpha = 1.0f;
+            }
+            StaticVariables.sqrtAlpha = (float)Math.Pow(draggedAlpha, 0.5f);
         }
 	}
 }

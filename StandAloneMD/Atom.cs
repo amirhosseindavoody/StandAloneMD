@@ -47,7 +47,6 @@ namespace StandAloneMD
 			m_AllAtoms.Add(this);
 		}
 
-
 		// method to extract the list of allMolecules
 		public static List<Atom> AllAtoms { 
 			get
@@ -55,71 +54,6 @@ namespace StandAloneMD
 				return m_AllAtoms;
 			}
 		}
-
-    /*
-    
-	//the function returns the Lennard-Jones force on the atom given the list of all the atoms in the simulation
-	Vector3 GetLennardJonesForce(List<Atom> objectsInRange){
-		Vector3 finalForce = Vector3.zero;
-
-		for (int i = 0; i < objectsInRange.Count; i++) {
-			Vector3 deltaR = transform.position - objectsInRange [i].transform.position;
-			float distanceSqr = deltaR.sqrMagnitude;
-
-			//only get the forces of the atoms that are within the cutoff range
-			if (objectsInRange[i].gameObject != gameObject && (distanceSqr < StaticVariables.cutoffSqr)) {
-
-				float finalSigma = StaticVariables.sigmaValues[atomID * objectsInRange[i].atomID];
-
-				int iR = (int) ((Mathf.Sqrt(distanceSqr)/finalSigma)/(StaticVariables.deltaR/StaticVariables.sigmaValueMax))+2;
-				float magnitude = StaticVariables.preLennardJones[iR];
-				magnitude = magnitude * 48.0f * epsilon / StaticVariables.angstromsToMeters/ finalSigma / finalSigma;
-				finalForce += deltaR * magnitude;
-			}
-		}
-		
-		Vector3 adjustedForce = finalForce / StaticVariables.mass100amuToKg;
-		adjustedForce = adjustedForce / StaticVariables.angstromsToMeters;
-		adjustedForce = adjustedForce * StaticVariables.fixedUpdateIntervalToRealTime * StaticVariables.fixedUpdateIntervalToRealTime;
-		return adjustedForce;
-	}
-
-	//the function returns the Buckingham force on the atom given the list of all the atoms in the simulation
-	Vector3 GetBuckinghamForce(List<Atom> objectsInRange){
-		Vector3 finalForce = Vector3.zero;
-		
-		for (int i = 0; i < objectsInRange.Count; i++) {
-			Vector3 deltaR = transform.position - objectsInRange [i].transform.position;
-			float distanceSqr = deltaR.sqrMagnitude;
-			float magnitude = 0.0f;
-			
-			//only get the forces of the atoms that are within the cutoff range
-			if ((objectsInRange[i].gameObject != gameObject) && (distanceSqr < StaticVariables.cutoffSqr)) {
-				float distance = Mathf.Sqrt(distanceSqr);
-
-				float final_A = StaticVariables.coeff_A [atomName + objectsInRange[i].atomName];
-				float final_B = StaticVariables.coeff_B [atomName + objectsInRange[i].atomName];
-				float final_C = StaticVariables.coeff_C [atomName + objectsInRange[i].atomName];
-				float final_D = StaticVariables.coeff_D [atomName + objectsInRange[i].atomName];
-
-				magnitude = final_A * final_B * Mathf.Exp (-final_B * distance) / distance;
-				magnitude = magnitude - 6.0f * final_C / Mathf.Pow (distanceSqr, 4);
-				magnitude = magnitude - 8.0f * final_D / Mathf.Pow (distanceSqr, 5);
-				magnitude = magnitude / StaticVariables.angstromsToMeters;
-				magnitude = magnitude + Q_eff * objectsInRange[i].Q_eff / (4.0f * Mathf.PI * StaticVariables.epsilon0 * distanceSqr * distance * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters);
-
-				finalForce += deltaR * magnitude;
-			}
-								
-		}
-		
-		Vector3 adjustedForce = finalForce / StaticVariables.mass100amuToKg;
-		adjustedForce = adjustedForce / StaticVariables.angstromsToMeters;
-		adjustedForce = adjustedForce * StaticVariables.fixedUpdateIntervalToRealTime * StaticVariables.fixedUpdateIntervalToRealTime;
-		return adjustedForce;
-	}
-
-    */
 	}
 }
 

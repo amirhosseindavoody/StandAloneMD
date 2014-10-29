@@ -30,7 +30,8 @@ namespace StandAloneMD
     	public static float currentTime = 0.0f;
 
 		//do not scale temperature all at once
-		public static float alphaDrag = 1.0f * fixedDeltaTime;
+		//public static float alphaDrag = 1.0f * fixedDeltaTime;
+        public static float alphaDrag = 1.0f * 0.001f;
 
 		//Boltzmann constant in J/K
 		public static float kB = 1.381f * (float) Math.Pow(10,-23);
@@ -52,10 +53,7 @@ namespace StandAloneMD
 		public static float cutoffSqr = cutoff * cutoff;
 
 		//The mesh size for pre-calculating Lennard Jones force.
-		public static float deltaR = 0.005f; 
-
-		
-		
+		public static float deltaR = 0.0001f; 
 
 		//When r_ij is small, the Lennard-Jones potential is extremely large.
 		//At a certain r_min, we will substitute the L-J potential with a function that
@@ -67,17 +65,15 @@ namespace StandAloneMD
 		
 		//Temperature slider bounds in K
 		public static float tempRangeLow = 0.01f;
-		public static float tempRangeHigh = 5000.0f; 
+		public static float tempRangeHigh = 5000.0f;
 
-        //Potential Energy
-        public static float PotentialEnergy = 0.0f;
-        //Kinetic Energy
-        public static float KineticEnergy = 0.0f;
+        public static float desiredTemperature = 300.0f;
 
 		//pre-calculated coefficients and forces for Lennard-Jones potential
 		public static float[,] sigmaValues = new float[3,3];
         public static float[,] accelCoefficient = new float[3, 3]; // this is the coefficient that is multiplied by the preLennardJones vector to get the acceleration of each atom for each combinations
-        public static float[] preLennardJones; //This is the pre-calculated value of LennardJones potential for some mesh points.
+        public static float[] preLennardJonesForce; //This is the pre-calculated value of LennardJones force for some mesh points.
+        public static float[] preLennardJonesPotential; //This is the pre-calculated value of LennardJones potential for some mesh points.
 
         //pre-calculated coefficients and forces for Buckingham potential
 		public static float[,] coeff_A = new float[3, 3];
@@ -96,5 +92,12 @@ namespace StandAloneMD
 			Brenner,
 			Buckingham
 		};
+
+        public static CreateEnvironment myEnvironment;
+        public static float kineticEnergy = 0.0f;  // units in Joules
+        public static float potentialEnergy = 0.0f;  // units in Joules
+        public static float currentTemperature = 0.0f;  // units in Kelvin
+
+        public static float sqrtAlpha = 1.0f;
 	}
 }

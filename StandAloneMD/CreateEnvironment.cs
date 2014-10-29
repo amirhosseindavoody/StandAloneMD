@@ -21,7 +21,7 @@ namespace StandAloneMD
 {
 	public class CreateEnvironment
 	{
-		public int numAtoms = 100;
+		public int numAtoms = 10;
     	private int numAtomTypes = 3;
 		public float width = 10.0f;
 		public float height = 10.0f;
@@ -74,15 +74,15 @@ namespace StandAloneMD
 
 			// precalculate the LennardJones potential and store it in preLennarJones array.
 			int nR = (int)(StaticVariables.cutoff/StaticVariables.deltaR)+1;
-			StaticVariables.preLennardJones = new float[nR];
+			StaticVariables.preLennardJonesForce = new float[nR];
+            StaticVariables.preLennardJonesPotential = new float[nR];
 
-			for (int i = 1; i < nR; i++)
+			for (int i = 0; i < nR; i++)
 			{
 				float distance = (float)i * StaticVariables.deltaR;
-				float magnitude = calcLennardJonesForce (distance);
-				StaticVariables.preLennardJones[i] = magnitude;
+                StaticVariables.preLennardJonesForce[i] = calcLennardJonesForce(distance);
+                StaticVariables.preLennardJonesPotential[i] = calcLennardJonesPotential(distance);
 			}
-            StaticVariables.preLennardJones[0] = StaticVariables.preLennardJones[1];
 
 		}
 
@@ -122,6 +122,23 @@ namespace StandAloneMD
         	return forceMagnitude;
     	}
 
+        //the function returns the LennarJones force on the atom given the list of the atoms that are within range of it
+        private float calcLennardJonesPotential(float distance)
+        {
+            float invDistance2 = 1.0f / distance / distance;
+            float invDistance6 = invDistance2 * invDistance2 * invDistance2;
+            float r_min = StaticVariables.rMinMultiplier;
+
+            float potential = 0.0f;
+
+            if (distance > 0.0f)
+            {
+                potential = invDistance6 * (invDistance6 - 1.0f);
+            }
+            
+            return potential;
+        }
+
 
 	
 		//initialize the atoms to a random position and to the original number of atoms
@@ -130,32 +147,50 @@ namespace StandAloneMD
 			for (int i = 0; i < numAtoms; i++)
 			{
 				Atom currAtom = new Copper();
-				//currAtom.velocity = new float[] { randomFloat(-1.0f, +1.0f), randomFloat(-1.0f, +1.0f), randomFloat(-1.0f, +1.0f)};
-				currAtom.position = new float[] { randomFloat(0.0f, depth), randomFloat(0.0f, width), randomFloat(0.0f, height) };
-                currAtom.velocity = new float[] { 0.0f, 0.0f, 0.0f };
-                //currAtom.position = new float[] { -1.23219f * currAtom.sigma / 2.0f + (float)i * 1.23219f * currAtom.sigma, 0.0f, 0.0f };
+                bool proximityFlag = false;
+ 
+                while (proximityFlag == false)
+                {
+                    currAtom.velocity = new float[] { randomFloat(-1.0f, +1.0f), randomFloat(-1.0f, +1.0f), randomFloat(-1.0f, +1.0f) };
+                    //currAtom.position = new float[] { randomFloat(-depth / 2.0f, depth / 2.0f), randomFloat(-width / 2.0f, width / 2.0f), 0.0f };
+                    currAtom.position = new float[] { randomFloat(-depth / 2.0f, depth / 2.0f), randomFloat(-width / 2.0f, width / 2.0f), randomFloat(-height / 2.0f, height / 2.0f) };
+                    proximityFlag = checkProximity(currAtom);
+                    
+                }
 			}	
 		}
 
-		//this method generates a random float number between the minValue and maxValue
-    	private float randomFloat(float minValue, float maxValue)
+        //this method generates a random float number between the minValue and maxValue
+        private float randomFloat(float minValue, float maxValue)
     	{
         	float rndFloat = (maxValue - minValue) * (float)rnd.NextDouble() + minValue;
         	return rndFloat;
     	}
 
-    	// print a list of atoms to the console
-        public void printAtomList()
-    	{
-        	Console.WriteLine("Total number of created atoms = " + Atom.AllAtoms.Count);
-        	for (int i = 0; i < Atom.AllAtoms.Count; i++)
-        	{
-            	Atom currAtom = Atom.AllAtoms[i];
-            	Console.WriteLine("Atom number = " + i + "        " + currAtom.atomName + "     " + currAtom.sigma);
-				Console.WriteLine("       (" + currAtom.position[0] + " , " + currAtom.position[1] + " , " + currAtom.position[2] + ")");
-				Console.WriteLine("       (" + currAtom.velocity[0] + " , " + currAtom.velocity[1] + " , " + currAtom.velocity[2] + ")");
-        	}
-        	Console.ReadLine();
-    	}
+        //check the distance between the atoms, if it is larger than the equilibrium position move accept the random number, otherwise pick another set of random positions.
+        private bool checkProximity(Atom currAtom)
+        {
+            bool proximityFlag = true;
+            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
+            {
+                Atom otherAtom = Atom.AllAtoms[i];
+                float[] deltaR = new float[3];
+                for (int idx = 0; idx < 3; idx++)
+                {
+                   deltaR[idx] = currAtom.position[idx] - otherAtom.position[idx];
+                }
+                float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
+                float finalSigma = StaticVariables.sigmaValues[currAtom.atomID, otherAtom.atomID];
+                float normDistanceSqr = distanceSqr / finalSigma / finalSigma; // this is normalized distanceSqr to the sigmaValue
+
+                //only get the forces of the atoms that are within the cutoff range
+                if (normDistanceSqr < 1.259921)
+                {
+                    proximityFlag = false;
+                }
+            }
+            return proximityFlag;
+        }
+
 	}
 }

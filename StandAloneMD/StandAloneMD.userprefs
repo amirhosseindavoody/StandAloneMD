@@ -1,10 +1,9 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="AssemblyInfo.cs">
+  <MonoDevelop.Ide.Workspace />
+  <MonoDevelop.Ide.Workbench ActiveDocument="..\..\atomtouch\Assets\Scripts\CalculateForces.cs">
     <Files>
-      <File FileName="Main.cs" Line="10" Column="24" />
-      <File FileName="Atom.cs" Line="1" Column="1" />
-      <File FileName="AssemblyInfo.cs" Line="1" Column="1" />
+      <File FileName="..\..\atomtouch\Assets\Scripts\CalculateForces.cs" Line="130" Column="50" />
+      <File FileName="..\..\atomtouch\Assets\Scripts\StaticVariables.cs" Line="92" Column="41" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
