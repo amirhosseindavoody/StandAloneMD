@@ -49,7 +49,7 @@ namespace StandAloneMD
 		public static float angstromsToMeters = (float) Math.Pow (10,-10);
 		
 		//Cutoff distance for calculating LennarJones force. This quantity is unit less and normalized to sigmaValue for atom pair
-		public static float cutoff = 10.0f; //[unit less]
+		public static float cutoff = 2.5f; //[unit less]
 		public static float cutoffSqr = cutoff * cutoff;
 
 		//The mesh size for pre-calculating Lennard Jones force.

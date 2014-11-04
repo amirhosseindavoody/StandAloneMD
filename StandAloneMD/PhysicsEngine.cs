@@ -122,11 +122,13 @@ namespace StandAloneMD
                 StaticVariables.kineticEnergy += 0.5f * firstAtom.massamu * StaticVariables.amuToKg * velocitySqr * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters;
 
                 // calculate potential energy between each pair of atoms
+                /*
                 for (int j = i + 1; j < Atom.AllAtoms.Count; j++)
                 {
                     Atom secondAtom = Atom.AllAtoms[j];
                     StaticVariables.potentialEnergy += getLennardJonesPotential(firstAtom, secondAtom);
                 }
+                 */
             }
 
             StaticVariables.currentTemperature = StaticVariables.kineticEnergy / 1.5f / (float)Atom.AllAtoms.Count / StaticVariables.kB;
