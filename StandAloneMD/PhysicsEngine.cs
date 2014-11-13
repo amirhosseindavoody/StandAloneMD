@@ -12,9 +12,6 @@ namespace StandAloneMD
 {
 	public class PhysicsEngine
 	{
-		public PhysicsEngine ()
-		{
-		}
 
 		public static void VelocityVerlet()
 		{
@@ -33,8 +30,17 @@ namespace StandAloneMD
 			// update the acceleration of all atoms
 			for (int i=0; i< Atom.AllAtoms.Count-1; i++) {
 				Atom firstAtom = Atom.AllAtoms[i];
-				for (int j=i+1; j<Atom.AllAtoms.Count; j++) {
-					Atom secondAtom = Atom.AllAtoms[j];
+                
+                /*
+                for (int j = i+1; j < Atom.AllAtoms.Count; j++)
+                {
+                    Atom secondAtom = Atom.AllAtoms[j];
+                    getLennardJonesForce(firstAtom, secondAtom);
+                }
+                */
+                
+                for (int j=0; j<firstAtom.neighborList.Count; j++) {
+					Atom secondAtom = firstAtom.neighborList[j];
                     getLennardJonesForce(firstAtom, secondAtom);
 				}
 			}
@@ -128,7 +134,14 @@ namespace StandAloneMD
                     Atom secondAtom = Atom.AllAtoms[j];
                     StaticVariables.potentialEnergy += getLennardJonesPotential(firstAtom, secondAtom);
                 }
-                 */
+                */
+                
+                for (int j = 0; j < firstAtom.neighborList.Count; j++)
+                {
+                    Atom secondAtom = firstAtom.neighborList[j];
+                    StaticVariables.potentialEnergy += getLennardJonesPotential(firstAtom, secondAtom);
+                }
+                
             }
 
             StaticVariables.currentTemperature = StaticVariables.kineticEnergy / 1.5f / (float)Atom.AllAtoms.Count / StaticVariables.kB;
@@ -153,11 +166,12 @@ namespace StandAloneMD
             if (normDistanceSqr <= StaticVariables.cutoffSqr)
             {
                 int iR = (int)((float)Math.Sqrt(normDistanceSqr) / (StaticVariables.deltaR));
-                potential = 4.0f * firstAtom.epsilon * StaticVariables.preLennardJonesPotential[iR];
+                potential = firstAtom.epsilon * StaticVariables.preLennardJonesPotential[iR];
             }
             return potential;
         }
 
+        //this function calculates the coefficient that scales the velocity of atoms to conserve the temperature
         private static void calculateSqrtAlpha()
         {
             float alpha = StaticVariables.desiredTemperature / StaticVariables.currentTemperature;
@@ -188,6 +202,62 @@ namespace StandAloneMD
             }
             StaticVariables.sqrtAlpha = (float)Math.Pow(draggedAlpha, 0.5f);
         }
+
+        public static void calculateVerletRadius()
+        {
+            // find the the minimum mass of an atom
+            float minMassAmu = 10000.0f;
+            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
+            {
+                Atom currAtom = Atom.AllAtoms[i];
+                if (minMassAmu > currAtom.massamu)
+                {
+                    minMassAmu = currAtom.massamu;
+                }
+            }
+            float averageVelocity = (float)Math.Sqrt( 3.0f * StaticVariables.kB * StaticVariables.desiredTemperature / minMassAmu / StaticVariables.amuToKg) / StaticVariables.angstromsToMeters;
+
+            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
+            {
+                Atom currAtom = Atom.AllAtoms[i];
+                //currAtom.verletRadius = StaticVariables.cutoff + 15.0f * (float)StaticVariables.nVerlet * averageVelocity * StaticVariables.MDTimestep / currAtom.sigma;
+                currAtom.verletRadius = StaticVariables.cutoff + 1.0f;
+                //Console.WriteLine("cutoff radius = " + StaticVariables.cutoff + " , verlet radius = " + currAtom.verletRadius);
+            }
+        }
+
+        public static void calculateNeighborList()
+        {
+            //clear the old neighborList
+            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
+            {
+                Atom currAtom = Atom.AllAtoms[i];
+                currAtom.neighborList.Clear();
+            }
+
+            //create the new neighborList
+            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
+            {
+                Atom firstAtom = Atom.AllAtoms[i];
+                for (int j = i + 1; j < Atom.AllAtoms.Count; j++)
+                {
+                    Atom secondAtom = Atom.AllAtoms[j];
+                    float[] deltaR = new float[3];
+                    for (int idx = 0; idx < 3; idx++)
+                    {
+                        deltaR[idx] = firstAtom.position[idx] - secondAtom.position[idx];
+                    }
+                    float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
+                    float finalSigma = StaticVariables.sigmaValues[firstAtom.atomID, secondAtom.atomID];
+                    float normDistanceSqr = distanceSqr / finalSigma / finalSigma; // this is normalized distanceSqr to the sigmaValue
+                    if (normDistanceSqr < (firstAtom.verletRadius * firstAtom.verletRadius))
+                    {
+                        firstAtom.neighborList.Add(secondAtom);
+                    }
+                }
+            }
+        }
+
 	}
 }
 

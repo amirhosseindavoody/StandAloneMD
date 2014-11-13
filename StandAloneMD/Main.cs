@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Diagnostics;
 
 namespace StandAloneMD
 {
@@ -10,9 +11,10 @@ namespace StandAloneMD
             StaticVariables.myEnvironment = new CreateEnvironment();
             StaticVariables.myEnvironment.PreCompute ();
             StaticVariables.myEnvironment.InitAtoms ();
+            PhysicsEngine.calculateVerletRadius();
 
             Console.WriteLine("Number of atoms = " + StaticVariables.myEnvironment.numAtoms);
-            Console.ReadLine();
+            //Console.ReadLine();
 
             float totalTime = 10.0f * (float)Math.Pow(10, -12);
             int iTime = 0;
@@ -20,14 +22,19 @@ namespace StandAloneMD
 
             //using (StreamWriter file = new StreamWriter("position.txt"))
             //{
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
                 while (StaticVariables.currentTime < totalTime)
                 {
-                    StaticVariables.currentTime = StaticVariables.currentTime + StaticVariables.MDTimestep;
+                    if (iTime % StaticVariables.nVerlet == 0)
+                        PhysicsEngine.calculateNeighborList();                    
                     PhysicsEngine.VelocityVerlet();
                     PhysicsEngine.ReflectFromWalls();
                     PhysicsEngine.CalculateEnergy();
+
+                    StaticVariables.currentTime = StaticVariables.currentTime + StaticVariables.MDTimestep;
                     iTime++;
-                    
+
                     /*
                     writeFlag--;
                     if (writeFlag == 0)
@@ -39,13 +46,16 @@ namespace StandAloneMD
                         writeFlag = 20;
                     }
                     */
-                    
 
-                    Console.WriteLine("iTime = " + iTime + "            Current Time = " + StaticVariables.currentTime);
+
+                    //Console.WriteLine("iTime = " + iTime + "            Current Time = " + StaticVariables.currentTime);
 
                 }
+                stopwatch.Stop();
+                Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
+                Console.WriteLine("iTime = " + iTime + "            Current Time = " + StaticVariables.currentTime);
+                Console.ReadLine();
             //}
-            Console.ReadLine();
 		}
 	}
 }

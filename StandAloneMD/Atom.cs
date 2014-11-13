@@ -37,6 +37,9 @@ namespace StandAloneMD
 		public abstract float buck_D { get; } // Buckingham potential coefficient
 		public abstract float Q_eff { get; } // Ion effective charge for use in Buckingham potential
 
+        public float verletRadius = 0.0f;
+        public List<Atom> neighborList = new List<Atom>();
+
 		public float[] velocity = new float[3]{0.0f, 0.0f, 0.0f};
 		public float[] position = new float[3]{0.0f, 0.0f, 0.0f};
 		public float[] accelerationNew = new float[3] {0.0f, 0.0f, 0.0f};

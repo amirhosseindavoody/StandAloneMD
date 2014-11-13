@@ -18,7 +18,7 @@ eV = 1.6e-19;
 filename = 'C:\Amirhossein\StandAloneMD\StandAloneMD\bin\Debug\position.txt';
 position = load (filename);
 
-numAtom = 10;
+numAtom = 100;
 nTime = size(position,1)/numAtom;
 
 Max = +5;
@@ -30,12 +30,12 @@ plot(position(:,4)/eV,'-b','LineWidth',3); hold on;
 plot(position(:,5)/eV,'-r','LineWidth',3);
 plot((position(:,4)+position(:,5))/eV,'-k','LineWidth',3);
 axis tight;
-
+return;
 %plot temperature of the gas
 fig=fig+1; figure(fig);
 plot(position(:,6),'-b','LineWidth',3);
 axis tight;
-% return;
+return;
 fig = fig+1; figure(fig);
 for iT = 1 :20: nTime
     

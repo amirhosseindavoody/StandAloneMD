@@ -49,7 +49,7 @@ namespace StandAloneMD
 					StaticVariables.sigmaValues[firstAtom.atomID,secondAtom.atomID] = currentSigma;
 
                     // when the pre-calculated normalized Lennard Jones force is multiplied by this coefficient the acceleration units is [Angstrom/second^2]
-                    float currentAccelCoeff = 48.0f * firstAtom.epsilon / (currentSigma * currentSigma * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters * firstAtom.massamu * StaticVariables.amuToKg);
+                    float currentAccelCoeff = 24.0f * firstAtom.epsilon / (currentSigma * currentSigma * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters * firstAtom.massamu * StaticVariables.amuToKg);
                     StaticVariables.accelCoefficient[firstAtom.atomID, secondAtom.atomID] = currentAccelCoeff;
 
 					float currentA = (float)Math.Sqrt(firstAtom.buck_A*secondAtom.buck_A);
@@ -91,13 +91,15 @@ namespace StandAloneMD
     	{
         	float invDistance2 = 1.0f / distance / distance;
         	float invDistance6 = invDistance2 * invDistance2 * invDistance2;
+            float invCutoff2 = 1.0f / StaticVariables.cutoff / StaticVariables.cutoff;
+            float invCutoff6 = invCutoff2 * invCutoff2 * invCutoff2;
         	float r_min = StaticVariables.rMinMultiplier;
 
         	float forceMagnitude = 0.0f;
 
         	if (distance > r_min)
         	{
-            	forceMagnitude = invDistance2 * invDistance6 * (invDistance6 - 0.5f);
+                forceMagnitude = invDistance2 * ((2.0f * invDistance6 * invDistance6 - invDistance6) - (invCutoff2 / invDistance2) * (2.0f * invCutoff6 * invCutoff6 - invCutoff6 ));
         	}
         	// Smooth the potential to go to a constant not infinity at r=0
         	else
@@ -105,14 +107,12 @@ namespace StandAloneMD
             	float invr_min = 1 / r_min;
             	float invr_min2 = invr_min * invr_min;
             	float invr_min6 = invr_min2 * invr_min2 * invr_min2;
-
-            	float magnitude_Vmin = invr_min2 * invr_min6 * (invr_min6 - 0.5f);
+                float magnitude_Vmin = invr_min2 * ((2.0f * invr_min6 * invr_min6 - invr_min6) - (invCutoff2 / invr_min2) * (2.0f * invCutoff6 * invCutoff6 - invCutoff6));
 
             	float r_Vmax = r_min / 1.5f;
             	float invr_Vmax2 = 1 / r_Vmax / r_Vmax;
             	float invr_Vmax6 = invr_Vmax2 * invr_Vmax2 * invr_Vmax2;
-
-            	float magnitude_Vmax = invr_Vmax2 * invr_Vmax6 * (invr_Vmax6 - 0.5f);
+                float magnitude_Vmax = invr_Vmax2 * ((2.0f * invr_Vmax6 * invr_Vmax6 - invr_Vmax6) - (invCutoff2 / invr_Vmax2) * (2.0f * invCutoff6 * invCutoff6 - invCutoff6));
 
             	float part1 = (distance / r_min) * ((float)Math.Exp(distance - r_min));
             	float part2 = magnitude_Vmax - magnitude_Vmin;
@@ -127,13 +127,15 @@ namespace StandAloneMD
         {
             float invDistance2 = 1.0f / distance / distance;
             float invDistance6 = invDistance2 * invDistance2 * invDistance2;
+            float invCutoff2 = 1.0f / StaticVariables.cutoff / StaticVariables.cutoff;
+            float invCutoff6 = invCutoff2 * invCutoff2 * invCutoff2;
             float r_min = StaticVariables.rMinMultiplier;
 
             float potential = 0.0f;
 
             if (distance > 0.0f)
             {
-                potential = invDistance6 * (invDistance6 - 1.0f);
+                potential = 4.0f * ((invDistance6 * invDistance6 - invDistance6) + (6.0f * invCutoff6 * invCutoff6 - 3.0f * invCutoff6) * (invCutoff2 / invDistance2) - 7.0f * invCutoff6 * invCutoff6 + 4.0f * invCutoff6);
             }
             
             return potential;
@@ -151,7 +153,8 @@ namespace StandAloneMD
  
                 while (proximityFlag == false)
                 {
-                    currAtom.velocity = new float[] { randomFloat(-1.0f, +1.0f), randomFloat(-1.0f, +1.0f), randomFloat(-1.0f, +1.0f) };
+                    float maxInitialVelocity = 3.0f * (float)Math.Pow(10,12);
+                    currAtom.velocity = new float[] { randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity), randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity), randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity) };
                     //currAtom.position = new float[] { randomFloat(-depth / 2.0f, depth / 2.0f), randomFloat(-width / 2.0f, width / 2.0f), 0.0f };
                     currAtom.position = new float[] { randomFloat(-depth / 2.0f, depth / 2.0f), randomFloat(-width / 2.0f, width / 2.0f), randomFloat(-height / 2.0f, height / 2.0f) };
                     proximityFlag = checkProximity(currAtom);

@@ -52,8 +52,11 @@ namespace StandAloneMD
 		public static float cutoff = 2.5f; //[unit less]
 		public static float cutoffSqr = cutoff * cutoff;
 
+        //Number of MD timesteps to update verlet list
+        public static int nVerlet = 100;
+
 		//The mesh size for pre-calculating Lennard Jones force.
-		public static float deltaR = 0.0001f; 
+		public static float deltaR = 0.000001f; 
 
 		//When r_ij is small, the Lennard-Jones potential is extremely large.
 		//At a certain r_min, we will substitute the L-J potential with a function that
