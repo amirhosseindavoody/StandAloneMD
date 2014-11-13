@@ -12,7 +12,7 @@ namespace StandAloneMD
         public static float cutoffSqr = cutoff * cutoff;
 
         //The mesh size for pre-calculating Lennard Jones force.
-        public static float dR = 0.000001f;
+        private static float dR = 0.000001f;
 
         //When r_ij is small, the Lennard-Jones potential is extremely large.
         //At a certain r_min, we will substitute the L-J potential with a function that
