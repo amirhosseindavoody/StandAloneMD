@@ -24,6 +24,9 @@ namespace StandAloneMD
     	//this is a list of all atoms
 		protected static List<Atom> m_AllAtoms = new List<Atom> ();
 
+        //this is a list of template atoms
+        public static List<Atom> templateAtoms = new List<Atom>();
+
 		//variables that must be implemented because they are declared as abstract in the base class
 		public abstract float epsilon{ get; } // J
 		public abstract float sigma { get; }
