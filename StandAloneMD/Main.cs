@@ -17,14 +17,14 @@ namespace StandAloneMD
                 Buckingham.calculateVerletRadius();
 
             Console.WriteLine("Number of atoms = " + StaticVariables.myEnvironment.numAtoms);
-            Console.ReadLine();
+            //Console.ReadLine();
 
             //float totalTime = 100.0f * (float)Math.Pow(10, -12);
             float totalTime = 20000.0f * StaticVariables.MDTimestep;
-            int writeFlag = 01;
+            //int writeFlag = 01;
 
-            using (StreamWriter file = new StreamWriter("position.txt"))
-            {
+            //using (StreamWriter file = new StreamWriter("position.txt"))
+            //{
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
                 while (StaticVariables.currentTime < totalTime)
@@ -37,7 +37,7 @@ namespace StandAloneMD
                     StaticVariables.currentTime = StaticVariables.currentTime + StaticVariables.MDTimestep;
                     StaticVariables.iTime++;
 
-                    
+                    /*
                     writeFlag--;
                     if (writeFlag == 0)
                     {
@@ -47,17 +47,18 @@ namespace StandAloneMD
                         }
                         writeFlag = 20;
                     }
+                    */ 
                     
 
 
-                    Console.WriteLine("iTime = " + StaticVariables.iTime + "            Current Time = " + StaticVariables.currentTime);
+                    //Console.WriteLine("iTime = " + StaticVariables.iTime + "            Current Time = " + StaticVariables.currentTime);
 
                 }
                 stopwatch.Stop();
                 Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
                 Console.WriteLine("iTime = " + StaticVariables.iTime + "            Current Time = " + StaticVariables.currentTime);
                 Console.ReadLine();
-            }
+            //}
 		}
 	}
 }

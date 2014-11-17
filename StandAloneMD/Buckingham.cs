@@ -84,7 +84,8 @@ namespace StandAloneMD
             float uPrime_r = -A * B * (float)Math.Exp(-B * distance) / StaticVariables.angstromsToMeters + 6.0f * C * invDistance7 / StaticVariables.angstromsToMeters + 8.0f * D * invDistance9 / StaticVariables.angstromsToMeters - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters) * invDistance2;
             float uPrime_rc = -A * B * (float)Math.Exp(-B * cutoff) / StaticVariables.angstromsToMeters + 6.0f * C * invCutoff7 / StaticVariables.angstromsToMeters + 8.0f * D * invCutoff9 / StaticVariables.angstromsToMeters - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters) * invCutoff2;
 
-            float forceMagnitude = -1.0f * uPrime_r / distance + uPrime_rc / cutoff;
+            //float forceMagnitude = -1.0f * uPrime_r / distance + uPrime_rc / cutoff;
+            float forceMagnitude = -1.0f * uPrime_r / distance;
             float acceleration = forceMagnitude / (firstAtom.massamu * StaticVariables.amuToKg * StaticVariables.angstromsToMeters); //Units of [1 / second^2] when multiplied by deltaR gets units of [Angstrom / second^2]
             return acceleration;
         }
@@ -114,7 +115,8 @@ namespace StandAloneMD
             float u_r = A * (float)Math.Exp(-B * distance) - C * invDistance6 - D * invDistance8 + firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) / distance;
             float u_rc = A * (float)Math.Exp(-B * cutoff) - C * invCutoff6 - D * invCutoff8 + firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) / cutoff;
 
-            float potential = u_r - (uPrime_rc * cutoff * StaticVariables.angstromsToMeters / 2.0f) * (distance * distance / cutoff / cutoff) - u_rc + (uPrime_rc * cutoff * StaticVariables.angstromsToMeters / 2.0f) ; //Units of Joules
+            //float potential = u_r - (uPrime_rc * cutoff * StaticVariables.angstromsToMeters / 2.0f) * (distance * distance / cutoff / cutoff) - u_rc + (uPrime_rc * cutoff * StaticVariables.angstromsToMeters / 2.0f) ; //Units of Joules
+            float potential = u_r; //Units of Joules
             return potential;
         }
 

@@ -123,7 +123,7 @@ namespace StandAloneMD
             bool proximityFlag = true;
             for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
             {
-                float minDistance = 3.0f;
+                float minDistance = 2.0f;
                 Atom otherAtom = Atom.AllAtoms[i];
                 float[] deltaR = new float[3];
                 for (int idx = 0; idx < 3; idx++)
