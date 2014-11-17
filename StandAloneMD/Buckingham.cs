@@ -8,11 +8,11 @@ namespace StandAloneMD
     class Buckingham
     {
         //Cutoff distance for calculating LennarJones force. This quantity is unit less and normalized to sigmaValue for atom pair
-        public static float cutoff = 4.0f; //[Angstroms]
+        public static float cutoff = 10.0f; //[Angstroms]
         public static float cutoffSqr = cutoff * cutoff;
 
         //The mesh size for pre-calculating Lennard Jones force.
-        private static float dR = 0.0001f;
+        private static float dR = 0.00001f;
 
         //pre-calculated coefficients and forces for Buckingham potential
         private static float[, ,] preBuckinghamAcceleration;
@@ -50,10 +50,12 @@ namespace StandAloneMD
                     float currentD = (float)Math.Sqrt(firstAtom.buck_D * secondAtom.buck_D);
                     coeff_D[firstAtom.atomID, secondAtom.atomID] = currentD;
 
-                    for (int iR = 0; i < nR; i++)
+                    for (int iR = 0; iR < nR; iR++)
                     {
-                        float distance = (float)i * dR;
-                        preBuckinghamAcceleration[firstAtom.atomID,secondAtom.atomID,iR] = calcForce(distance,firstAtom,secondAtom);
+                        float distance = (float)iR * dR;
+                        if (distance < 0.5f)
+                            distance = 0.5f;
+                        preBuckinghamAcceleration[firstAtom.atomID,secondAtom.atomID,iR] = calcAcceleration(distance,firstAtom,secondAtom);
                         PreBuckinghamPotential[firstAtom.atomID, secondAtom.atomID, iR] = calcPotential(distance, firstAtom, secondAtom);
                     }
                 }
@@ -61,58 +63,144 @@ namespace StandAloneMD
         }
 
         //the function returns the LennarJones force on the atom given the list of the atoms that are within range of it
-        private static float calcForce(float distance,Atom firsAtom, Atom secondAtom)
+        private static float calcAcceleration(float distance,Atom firstAtom, Atom secondAtom)
         {
             float invDistance2 = 1.0f / distance / distance;
             float invDistance6 = invDistance2 * invDistance2 * invDistance2;
+            float invDistance7 = invDistance6 / distance;
+            float invDistance8 = invDistance2 * invDistance2 * invDistance2 * invDistance2;
+            float invDistance9 = invDistance8 / distance;
             float invCutoff2 = 1.0f / cutoff / cutoff;
             float invCutoff6 = invCutoff2 * invCutoff2 * invCutoff2;
-            float r_min = rMinMultiplier;
+            float invCutoff7 = invCutoff6 / cutoff;
+            float invCutoff8 = invCutoff2 * invCutoff2 * invCutoff2 * invCutoff2;
+            float invCutoff9 = invCutoff8 / cutoff;
+            
+            float A = coeff_A [firstAtom.atomID,secondAtom.atomID];
+            float B = coeff_B [firstAtom.atomID,secondAtom.atomID];
+            float C = coeff_C [firstAtom.atomID,secondAtom.atomID];
+            float D = coeff_D [firstAtom.atomID,secondAtom.atomID];
 
-            float forceMagnitude = 0.0f;
+            float uPrime_r = -A * B * (float)Math.Exp(-B * distance) / StaticVariables.angstromsToMeters + 6.0f * C * invDistance7 / StaticVariables.angstromsToMeters + 8.0f * D * invDistance9 / StaticVariables.angstromsToMeters - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters) * invDistance2;
+            float uPrime_rc = -A * B * (float)Math.Exp(-B * cutoff) / StaticVariables.angstromsToMeters + 6.0f * C * invCutoff7 / StaticVariables.angstromsToMeters + 8.0f * D * invCutoff9 / StaticVariables.angstromsToMeters - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters) * invCutoff2;
 
-            if (distance > r_min)
-            {
-                forceMagnitude = invDistance2 * ((2.0f * invDistance6 * invDistance6 - invDistance6) - (invCutoff2 / invDistance2) * (2.0f * invCutoff6 * invCutoff6 - invCutoff6));
-            }
-            // Smooth the potential to go to a constant not infinity at r=0
-            else
-            {
-                float invr_min = 1 / r_min;
-                float invr_min2 = invr_min * invr_min;
-                float invr_min6 = invr_min2 * invr_min2 * invr_min2;
-                float magnitude_Vmin = invr_min2 * ((2.0f * invr_min6 * invr_min6 - invr_min6) - (invCutoff2 / invr_min2) * (2.0f * invCutoff6 * invCutoff6 - invCutoff6));
-
-                float r_Vmax = r_min / 1.5f;
-                float invr_Vmax2 = 1 / r_Vmax / r_Vmax;
-                float invr_Vmax6 = invr_Vmax2 * invr_Vmax2 * invr_Vmax2;
-                float magnitude_Vmax = invr_Vmax2 * ((2.0f * invr_Vmax6 * invr_Vmax6 - invr_Vmax6) - (invCutoff2 / invr_Vmax2) * (2.0f * invCutoff6 * invCutoff6 - invCutoff6));
-
-                float part1 = (distance / r_min) * ((float)Math.Exp(distance - r_min));
-                float part2 = magnitude_Vmax - magnitude_Vmin;
-                forceMagnitude = magnitude_Vmax - (part1 * part2);
-            }
-
-            return forceMagnitude;
+            float forceMagnitude = -1.0f * uPrime_r / distance + uPrime_rc / cutoff;
+            float acceleration = forceMagnitude / (firstAtom.massamu * StaticVariables.amuToKg * StaticVariables.angstromsToMeters); //Units of [1 / second^2] when multiplied by deltaR gets units of [Angstrom / second^2]
+            return acceleration;
         }
 
         //the function returns the LennarJones force on the atom given the list of the atoms that are within range of it
-        private static float calcPotential(float distance, Atom firsAtom, Atom secondAtom)
+        private static float calcPotential(float distance, Atom firstAtom, Atom secondAtom)
         {
             float invDistance2 = 1.0f / distance / distance;
             float invDistance6 = invDistance2 * invDistance2 * invDistance2;
+            float invDistance7 = invDistance6 / distance;
+            float invDistance8 = invDistance2 * invDistance2 * invDistance2 * invDistance2;
+            float invDistance9 = invDistance8 / distance;
             float invCutoff2 = 1.0f / cutoff / cutoff;
             float invCutoff6 = invCutoff2 * invCutoff2 * invCutoff2;
-            float r_min = rMinMultiplier;
+            float invCutoff7 = invCutoff6 / cutoff;
+            float invCutoff8 = invCutoff2 * invCutoff2 * invCutoff2 * invCutoff2;
+            float invCutoff9 = invCutoff8 / cutoff;
 
-            float potential = 0.0f;
+            float A = coeff_A[firstAtom.atomID, secondAtom.atomID];
+            float B = coeff_B[firstAtom.atomID, secondAtom.atomID];
+            float C = coeff_C[firstAtom.atomID, secondAtom.atomID];
+            float D = coeff_D[firstAtom.atomID, secondAtom.atomID];
 
-            if (distance > 0.0f)
+            float uPrime_r = -A * B * (float)Math.Exp(-B * distance) / StaticVariables.angstromsToMeters + 6.0f * C * invDistance7 / StaticVariables.angstromsToMeters + 8.0f * D * invDistance9 / StaticVariables.angstromsToMeters - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters) * invDistance2;
+            float uPrime_rc = -A * B * (float)Math.Exp(-B * cutoff) / StaticVariables.angstromsToMeters + 6.0f * C * invCutoff7 / StaticVariables.angstromsToMeters + 8.0f * D * invCutoff9 / StaticVariables.angstromsToMeters - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters) * invCutoff2;
+
+            float u_r = A * (float)Math.Exp(-B * distance) - C * invDistance6 - D * invDistance8 + firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) / distance;
+            float u_rc = A * (float)Math.Exp(-B * cutoff) - C * invCutoff6 - D * invCutoff8 + firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) / cutoff;
+
+            float potential = u_r - (uPrime_rc * cutoff * StaticVariables.angstromsToMeters / 2.0f) * (distance * distance / cutoff / cutoff) - u_rc + (uPrime_rc * cutoff * StaticVariables.angstromsToMeters / 2.0f) ; //Units of Joules
+            return potential;
+        }
+
+        //the function returns the Lennard-Jones force on the atom given the list of all the atoms in the simulation
+        public static void getForce(Atom firstAtom, Atom secondAtom)
+        {
+            float[] firstAtomAcceleration = new float[3];
+            float[] secondAtomAcceleration = new float[3];
+
+            float[] deltaR = new float[3];
+            for (int idx = 0; idx < 3; idx++)
             {
-                potential = 4.0f * ((invDistance6 * invDistance6 - invDistance6) + (6.0f * invCutoff6 * invCutoff6 - 3.0f * invCutoff6) * (invCutoff2 / invDistance2) - 7.0f * invCutoff6 * invCutoff6 + 4.0f * invCutoff6);
+                deltaR[idx] = firstAtom.position[idx] - secondAtom.position[idx];
+            }
+            float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
+
+            //only get the forces of the atoms that are within the cutoff range
+            if (distanceSqr <= cutoffSqr)
+            {
+                int iR = (int)((float)Math.Sqrt(distanceSqr) / (dR));
+                for (int idx = 0; idx < 3; idx++)
+                {
+                    firstAtom.accelerationNew[idx] = firstAtom.accelerationNew[idx] + preBuckinghamAcceleration[firstAtom.atomID, secondAtom.atomID,iR] * deltaR[idx];
+                    secondAtom.accelerationNew[idx] = secondAtom.accelerationNew[idx] - preBuckinghamAcceleration[secondAtom.atomID, firstAtom.atomID,iR] * deltaR[idx];
+                }
+            }
+        }
+
+        //the function returns the Lennard-Jones force on the atom given the list of all the atoms in the simulation
+        public static float getPotential(Atom firstAtom, Atom secondAtom)
+        {
+            float potential = 0.0f;
+            float[] deltaR = new float[3];
+            for (int idx = 0; idx < 3; idx++)
+            {
+                deltaR[idx] = firstAtom.position[idx] - secondAtom.position[idx];
+            }
+            float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
+
+            //only get the forces of the atoms that are within the cutoff range
+            if (distanceSqr <= cutoffSqr)
+            {
+                int iR = (int)((float)Math.Sqrt(distanceSqr) / (dR));
+                potential = (PreBuckinghamPotential[firstAtom.atomID, secondAtom.atomID,iR] + PreBuckinghamPotential[firstAtom.atomID, secondAtom.atomID,iR]) / 2.0f ;
+            }
+            return potential;
+        }
+
+        public static void calculateVerletRadius()
+        {
+            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
+            {
+                Atom currAtom = Atom.AllAtoms[i];
+                currAtom.verletRadius = cutoff + 1.0f;
+            }
+        }
+
+        //This function creates a list of all neighbor list for each atom
+        public static void calculateNeighborList()
+        {
+            //clear the old neighborList
+            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
+            {
+                Atom currAtom = Atom.AllAtoms[i];
+                currAtom.neighborList.Clear();
             }
 
-            return potential;
+            //create the new neighborList
+            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
+            {
+                Atom firstAtom = Atom.AllAtoms[i];
+                for (int j = i + 1; j < Atom.AllAtoms.Count; j++)
+                {
+                    Atom secondAtom = Atom.AllAtoms[j];
+                    float[] deltaR = new float[3];
+                    for (int idx = 0; idx < 3; idx++)
+                    {
+                        deltaR[idx] = firstAtom.position[idx] - secondAtom.position[idx];
+                    }
+                    float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
+                    if (distanceSqr < (firstAtom.verletRadius * firstAtom.verletRadius))
+                    {
+                        firstAtom.neighborList.Add(secondAtom);
+                    }
+                }
+            }
         }
     }
 }

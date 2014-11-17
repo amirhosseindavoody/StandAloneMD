@@ -11,12 +11,16 @@ namespace StandAloneMD
             StaticVariables.myEnvironment = new CreateEnvironment();
             StaticVariables.myEnvironment.PreCompute ();
             StaticVariables.myEnvironment.InitAtoms ();
-            LennardJones.calculateVerletRadius();
+            if (StaticVariables.currentPotential == StaticVariables.Potential.LennardJones)
+                LennardJones.calculateVerletRadius();
+            if (StaticVariables.currentPotential == StaticVariables.Potential.Buckingham)
+                Buckingham.calculateVerletRadius();
 
             Console.WriteLine("Number of atoms = " + StaticVariables.myEnvironment.numAtoms);
-            //Console.ReadLine();
+            Console.ReadLine();
 
-            float totalTime = 100.0f * (float)Math.Pow(10, -12);
+            //float totalTime = 100.0f * (float)Math.Pow(10, -12);
+            float totalTime = 20000.0f * StaticVariables.MDTimestep;
             int writeFlag = 01;
 
             using (StreamWriter file = new StreamWriter("position.txt"))
@@ -46,7 +50,7 @@ namespace StandAloneMD
                     
 
 
-                    //Console.WriteLine("iTime = " + iTime + "            Current Time = " + StaticVariables.currentTime);
+                    Console.WriteLine("iTime = " + StaticVariables.iTime + "            Current Time = " + StaticVariables.currentTime);
 
                 }
                 stopwatch.Stop();

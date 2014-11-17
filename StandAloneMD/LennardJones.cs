@@ -136,8 +136,8 @@ namespace StandAloneMD
                 int iR = (int)((float)Math.Sqrt(normDistanceSqr) / (dR));
                 for (int idx = 0; idx < 3; idx++)
                 {
-                    firstAtom.accelerationNew[idx] = firstAtom.accelerationNew[idx] + LennardJones.preLennardJonesForce[iR] * LennardJones.accelCoefficient[firstAtom.atomID, secondAtom.atomID] * deltaR[idx];
-                    secondAtom.accelerationNew[idx] = secondAtom.accelerationNew[idx] - LennardJones.preLennardJonesForce[iR] * LennardJones.accelCoefficient[secondAtom.atomID, firstAtom.atomID] * deltaR[idx];
+                    firstAtom.accelerationNew[idx] = firstAtom.accelerationNew[idx] + preLennardJonesForce[iR] * accelCoefficient[firstAtom.atomID, secondAtom.atomID] * deltaR[idx];
+                    secondAtom.accelerationNew[idx] = secondAtom.accelerationNew[idx] - preLennardJonesForce[iR] * accelCoefficient[secondAtom.atomID, firstAtom.atomID] * deltaR[idx];
                 }
             }
         }

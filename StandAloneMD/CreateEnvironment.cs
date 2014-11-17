@@ -21,10 +21,10 @@ namespace StandAloneMD
 {
 	public class CreateEnvironment
 	{
-		public int numAtoms = 10;
-		public float width = 10.0f;
-		public float height = 10.0f;
-		public float depth = 10.0f;
+		public int numAtoms = 100;
+		public float width = 30.0f;
+		public float height = 30.0f;
+		public float depth = 30.0f;
 		public float volume;
 		private Random rnd = new Random();
 
@@ -47,23 +47,68 @@ namespace StandAloneMD
 
 	
 		//initialize the atoms to a random position and to the original number of atoms
-		public void InitAtoms()
+        public void InitAtoms()
 		{
-			for (int i = 0; i < numAtoms; i++)
-			{
-				Atom currAtom = new Copper();
-                bool proximityFlag = false;
- 
-                while (proximityFlag == false)
+            if (StaticVariables.currentPotential == StaticVariables.Potential.LennardJones)
+            {
+                for (int i = 0; i < numAtoms; i++)
                 {
-                    float maxInitialVelocity = 3.0f * (float)Math.Pow(10,12);
-                    currAtom.velocity = new float[] { randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity), randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity), randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity) };
-                    currAtom.position = new float[] { randomFloat(-depth / 2.0f, depth / 2.0f), randomFloat(-width / 2.0f, width / 2.0f), randomFloat(-height / 2.0f, height / 2.0f) };
-                    proximityFlag = checkProximity(currAtom);
-                    
+                    Atom currAtom = new Copper();
+                    bool proximityFlag = false;
+
+                    while (proximityFlag == false)
+                    {
+                        float maxInitialVelocity = 3.0f * (float)Math.Pow(10, 12);
+                        currAtom.velocity = new float[] { randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity), randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity), randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity) };
+                        currAtom.position = new float[] { randomFloat(-depth / 2.0f, depth / 2.0f), randomFloat(-width / 2.0f, width / 2.0f), randomFloat(-height / 2.0f, height / 2.0f) };
+                        proximityFlag = checkProximity(currAtom);
+                    }
                 }
-			}	
+            }
+            else if (StaticVariables.currentPotential == StaticVariables.Potential.Buckingham)
+            {
+                for (int i = 0; i < numAtoms/2; i++)
+                {
+                    Atom currAtom = new Copper();
+                    bool proximityFlag = false;
+
+                    while (proximityFlag == false)
+                    {
+                        currAtom.velocity = new float[] { 0.0f, 0.0f, 0.0f };
+                        currAtom.position = new float[] { randomFloat(-depth / 2.0f, depth / 2.0f), randomFloat(-width / 2.0f, width / 2.0f), randomFloat(-height / 2.0f, height / 2.0f) };
+                        proximityFlag = checkProximity(currAtom);
+                    }
+                }
+                for (int i = numAtoms/2; i < numAtoms; i++)
+                {
+                    Atom currAtom = new Gold();
+                    bool proximityFlag = false;
+
+                    while (proximityFlag == false)
+                    {
+                        currAtom.velocity = new float[] { 0.0f, 0.0f, 0.0f };
+                        currAtom.position = new float[] { randomFloat(-depth / 2.0f, depth / 2.0f), randomFloat(-width / 2.0f, width / 2.0f), randomFloat(-height / 2.0f, height / 2.0f) };
+                        proximityFlag = checkProximity(currAtom);
+                    }
+                }
+            }
+
 		}
+        
+
+        //initialize the atoms to a random position and to the original number of atoms
+        /*
+        public void InitAtoms()
+        {
+            Atom copperAtom = new Copper();
+            copperAtom.velocity = new float[] { 0.0f, 0.0f, 0.0f };
+            copperAtom.position = new float[] { -1.5f, 0.0f, 0.0f };
+
+            Atom goldAtom = new Gold();
+            goldAtom.velocity = new float[] { 0.0f, 0.0f, 0.0f };
+            goldAtom.position = new float[] { +1.5f, 0.0f, 0.0f };
+        }
+        */
 
         //this method generates a random float number between the minValue and maxValue
         private float randomFloat(float minValue, float maxValue)
