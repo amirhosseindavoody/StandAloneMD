@@ -21,12 +21,14 @@ namespace StandAloneMD
 {
 	public class CreateEnvironment
 	{
-		public int numAtoms = 1000;
+		public int numAtoms = 100;
 		public float width;
 		public float height;
 		public float depth;
 		public float volume;
 		private Random rnd = new Random();
+
+        public static CreateEnvironment myEnvironment;
 
 		public void PreCompute ()
 		{
@@ -40,8 +42,17 @@ namespace StandAloneMD
                 Atom.AllAtoms.Clear();
             }
 
-            LennardJones.preLennardJones();
-            Buckingham.preBuckingham();
+            switch (Potential.currentPotential)
+            {
+                case Potential.potentialType.LennardJones:
+                    Potential.myPotential = new LennardJones();
+                    break;
+                case Potential.potentialType.Buckingham:
+                    Potential.myPotential = new Buckingham();
+                    break;
+            }
+
+            Potential.myPotential.preCompute();
 		}
 
 
@@ -55,7 +66,7 @@ namespace StandAloneMD
             height = 30.0f;
             volume = width * depth * height;
 
-            if (StaticVariables.currentPotential == StaticVariables.Potential.LennardJones)
+            if (Potential.currentPotential == Potential.potentialType.LennardJones)
             {
                 for (int i = 0; i < numAtoms; i++)
                 {
@@ -71,7 +82,7 @@ namespace StandAloneMD
                     }
                 }
             }
-            else if (StaticVariables.currentPotential == StaticVariables.Potential.Buckingham)
+            else if ((Potential.currentPotential == Potential.potentialType.Buckingham))
             {
                 for (int i = 0; i < numAtoms/2; i++)
                 {

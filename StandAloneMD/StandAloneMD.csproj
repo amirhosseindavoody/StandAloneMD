@@ -37,6 +37,7 @@
   <ItemGroup>
     <Compile Include="Buckingham.cs" />
     <Compile Include="PairDistributionFunction.cs" />
+    <Compile Include="Potential.cs" />
     <Compile Include="WriteData.cs" />
     <Compile Include="LennardJones.cs" />
     <Compile Include="Matrix.cs" />

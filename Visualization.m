@@ -4,7 +4,7 @@ clear all;
 clc;
 fig = 20;
 eV = 1.6e-19;
-numAtom = 1000;
+numAtom = 10;
 %%
 % filename = 'C:\Amirhossein\StandAloneMD\StandAloneMD\bin\Debug\force.txt';
 % rawForce = load (filename);

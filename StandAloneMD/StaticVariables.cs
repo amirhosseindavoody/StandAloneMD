@@ -57,19 +57,6 @@ namespace StandAloneMD
 		public static float tempRangeHigh = 5000.0f;
         public static float desiredTemperature = 300.0f;
 
-		//this varaible keeps track of the current potential that is being used. (Note: only Lennard-Jones is currently implemented)
-		public static Potential currentPotential = Potential.LennardJones;
-		
-		//There are three potentials, but currently Lennard-Jones is the only one that is implemented so changing
-		//between these potentials doesnt do anything
-		public enum Potential
-		{
-			LennardJones,
-			Brenner,
-			Buckingham
-		};
-
-        public static CreateEnvironment myEnvironment;
         public static float kineticEnergy = 0.0f;  // units in Joules
         public static float potentialEnergy = 0.0f;  // units in Joules
         public static float currentTemperature = 0.0f;  // units in Kelvin

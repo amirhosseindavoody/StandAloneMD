@@ -27,11 +27,10 @@ namespace StandAloneMD
             writeFlag--;
             if (writeFlag == 0)
             {
+                Console.WriteLine("iTime = " + StaticVariables.iTime);
                 for (int i = 0; i < Atom.AllAtoms.Count; i++)
                 {
-                    Console.WriteLine("iTime = " + StaticVariables.iTime);
-
-                    //positionFile.WriteLine(Atom.AllAtoms[i].position[0] + "    " + Atom.AllAtoms[i].position[1] + "    " + Atom.AllAtoms[i].position[2]);
+                    positionFile.WriteLine(Atom.AllAtoms[i].position[0] + "    " + Atom.AllAtoms[i].position[1] + "    " + Atom.AllAtoms[i].position[2]);
                     energyFile.WriteLine(StaticVariables.potentialEnergy + "    " + StaticVariables.kineticEnergy);
                     temperatureFile.WriteLine(StaticVariables.currentTemperature);
                 }

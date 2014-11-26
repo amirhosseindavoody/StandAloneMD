@@ -10,18 +10,14 @@ namespace StandAloneMD
 		{
             WriteData myData = new WriteData();
 
-            StaticVariables.myEnvironment = new CreateEnvironment();
-            StaticVariables.myEnvironment.PreCompute ();
-            StaticVariables.myEnvironment.InitAtoms ();
+            CreateEnvironment.myEnvironment = new CreateEnvironment();
+            CreateEnvironment.myEnvironment.PreCompute();
+            CreateEnvironment.myEnvironment.InitAtoms();
+            Potential.myPotential.calculateVerletRadius();
 
-            if (StaticVariables.currentPotential == StaticVariables.Potential.LennardJones)
-                LennardJones.calculateVerletRadius();
-            if (StaticVariables.currentPotential == StaticVariables.Potential.Buckingham)
-                Buckingham.calculateVerletRadius();
+            Console.WriteLine("Number of atoms = " + CreateEnvironment.myEnvironment.numAtoms);
 
-            Console.WriteLine("Number of atoms = " + StaticVariables.myEnvironment.numAtoms);
-
-            float totalTime = 40000.0f * StaticVariables.MDTimestep;
+            float totalTime = 20000.0f * StaticVariables.MDTimestep;
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             while (StaticVariables.currentTime < totalTime)
@@ -34,7 +30,6 @@ namespace StandAloneMD
                 StaticVariables.currentTime = StaticVariables.currentTime + StaticVariables.MDTimestep;
                 StaticVariables.iTime++;
                 myData.WritePosition();
-                //Console.WriteLine("iTime = " + StaticVariables.iTime);
             }
             
             stopwatch.Stop();

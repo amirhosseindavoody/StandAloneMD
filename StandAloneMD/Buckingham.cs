@@ -5,25 +5,30 @@ using System.Text;
 
 namespace StandAloneMD
 {
-    class Buckingham
+    class Buckingham : Potential
     {
         //Cutoff distance for calculating LennarJones force. This quantity is unit less and normalized to sigmaValue for atom pair
-        public static float cutoff = 10.0f; //[Angstroms]
-        public static float cutoffSqr = cutoff * cutoff;
+        public float cutoff = 10.0f; //[Angstroms]
+        public float cutoffSqr;
 
         //The mesh size for pre-calculating Lennard Jones force.
-        private static float dR = 0.00001f;
+        private float dR = 0.00001f;
 
         //pre-calculated coefficients and forces for Buckingham potential
-        private static float[, ,] preBuckinghamAcceleration;
-        private static float[, ,] PreBuckinghamPotential;
+        private float[, ,] preBuckinghamAcceleration;
+        private float[, ,] PreBuckinghamPotential;
 
-        private static float[,] coeff_A = new float[3, 3];
-        private static float[,] coeff_B = new float[3, 3];
-        private static float[,] coeff_C = new float[3, 3];
-        private static float[,] coeff_D = new float[3, 3];
+        private float[,] coeff_A = new float[3, 3];
+        private float[,] coeff_B = new float[3, 3];
+        private float[,] coeff_C = new float[3, 3];
+        private float[,] coeff_D = new float[3, 3];
 
-        public static void preBuckingham()
+        public Buckingham()
+        {
+            cutoffSqr = cutoff * cutoff;
+        }
+
+        public override void preCompute()
         {
             // precalculate the LennardJones potential and store it in preLennarJones array.
             int nR = (int)(cutoff / dR) + 1;
@@ -63,7 +68,7 @@ namespace StandAloneMD
         }
 
         //the function returns the LennarJones force on the atom given the list of the atoms that are within range of it
-        private static float calcAcceleration(float distance,Atom firstAtom, Atom secondAtom)
+        private float calcAcceleration(float distance,Atom firstAtom, Atom secondAtom)
         {
             float invDistance2 = 1.0f / distance / distance;
             float invDistance6 = invDistance2 * invDistance2 * invDistance2;
@@ -91,7 +96,7 @@ namespace StandAloneMD
         }
 
         //the function returns the LennarJones force on the atom given the list of the atoms that are within range of it
-        private static float calcPotential(float distance, Atom firstAtom, Atom secondAtom)
+        private float calcPotential(float distance, Atom firstAtom, Atom secondAtom)
         {
             float invDistance2 = 1.0f / distance / distance;
             float invDistance6 = invDistance2 * invDistance2 * invDistance2;
@@ -121,7 +126,7 @@ namespace StandAloneMD
         }
 
         //the function returns the Lennard-Jones force on the atom given the list of all the atoms in the simulation
-        public static void getForce(Atom firstAtom, Atom secondAtom)
+        public override void getForce(Atom firstAtom, Atom secondAtom)
         {
             float[] firstAtomAcceleration = new float[3];
             float[] secondAtomAcceleration = new float[3];
@@ -146,7 +151,7 @@ namespace StandAloneMD
         }
 
         //the function returns the Lennard-Jones force on the atom given the list of all the atoms in the simulation
-        public static float getPotential(Atom firstAtom, Atom secondAtom)
+        public override float getPotential(Atom firstAtom, Atom secondAtom)
         {
             float potential = 0.0f;
             float[] deltaR = new float[3];
@@ -165,7 +170,7 @@ namespace StandAloneMD
             return potential;
         }
 
-        public static void calculateVerletRadius()
+        public override void calculateVerletRadius()
         {
             for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
             {
@@ -175,7 +180,7 @@ namespace StandAloneMD
         }
 
         //This function creates a list of all neighbor list for each atom
-        public static void calculateNeighborList()
+        public override void calculateNeighborList()
         {
             //clear the old neighborList
             for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)

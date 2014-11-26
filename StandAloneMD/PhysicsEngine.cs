@@ -18,35 +18,19 @@ namespace StandAloneMD
                 currAtom.accelerationNew = new float[3] { 0.0f, 0.0f, 0.0f };
 			}
 
-            if (StaticVariables.currentPotential == StaticVariables.Potential.LennardJones)
+            if (StaticVariables.iTime % StaticVariables.nVerlet == 0)
             {
-                if (StaticVariables.iTime % StaticVariables.nVerlet == 0)
-                {
-                    LennardJones.calculateNeighborList();
-                }
-                // update the acceleration of all atoms
-			    for (int i=0; i< Atom.AllAtoms.Count-1; i++) {
-				    Atom firstAtom = Atom.AllAtoms[i];
-                    for (int j=0; j<firstAtom.neighborList.Count; j++) {
-				    	Atom secondAtom = firstAtom.neighborList[j];
-                        LennardJones.getForce(firstAtom, secondAtom);
-				    }
-			    }
-            } 
-            else if (StaticVariables.currentPotential == StaticVariables.Potential.Buckingham)
+                Potential.myPotential.calculateNeighborList();
+            }
+            // update the acceleration of all atoms
+            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
             {
-                if (StaticVariables.iTime % StaticVariables.nVerlet == 0)
+                Atom firstAtom = Atom.AllAtoms[i];
+                for (int j = 0; j < firstAtom.neighborList.Count; j++)
                 {
-                    Buckingham.calculateNeighborList();
+                    Atom secondAtom = firstAtom.neighborList[j];
+                    Potential.myPotential.getForce(firstAtom, secondAtom);
                 }
-                // update the acceleration of all atoms
-			    for (int i=0; i< Atom.AllAtoms.Count-1; i++) {
-				    Atom firstAtom = Atom.AllAtoms[i];
-                    for (int j=0; j<firstAtom.neighborList.Count; j++) {
-				    	Atom secondAtom = firstAtom.neighborList[j];
-                        Buckingham.getForce(firstAtom, secondAtom);
-				    }
-			    }
             }
 
             // update the velocity of all atoms
@@ -66,7 +50,7 @@ namespace StandAloneMD
         //reflect the atoms from the walls
         public static void ReflectFromWalls()
         {
-            float[] boxDimension = new float[3] {StaticVariables.myEnvironment.depth, StaticVariables.myEnvironment.width , StaticVariables.myEnvironment.height};
+            float[] boxDimension = new float[3] { CreateEnvironment.myEnvironment.depth, CreateEnvironment.myEnvironment.width, CreateEnvironment.myEnvironment.height };
             
             for (int i = 0; i < Atom.AllAtoms.Count; i++)
             {
@@ -106,27 +90,15 @@ namespace StandAloneMD
                 StaticVariables.kineticEnergy += 0.5f * firstAtom.massamu * StaticVariables.amuToKg * velocitySqr * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters;
 
                 // calculate potential energy between each pair of atoms
-                if (StaticVariables.currentPotential == StaticVariables.Potential.LennardJones)
+                for (int j = 0; j < firstAtom.neighborList.Count; j++)
                 {
-                    for (int j = 0; j < firstAtom.neighborList.Count; j++)
-                    {
-                        Atom secondAtom = firstAtom.neighborList[j];
-                        StaticVariables.potentialEnergy += LennardJones.getPotential(firstAtom, secondAtom);
-                    }
-                }
-                else if (StaticVariables.currentPotential == StaticVariables.Potential.Buckingham)
-                {
-                    for (int j = 0; j < firstAtom.neighborList.Count; j++)
-                    {
-                        Atom secondAtom = firstAtom.neighborList[j];
-                        StaticVariables.potentialEnergy += Buckingham.getPotential(firstAtom, secondAtom);
-                    }
+                    Atom secondAtom = firstAtom.neighborList[j];
+                    StaticVariables.potentialEnergy += Potential.myPotential.getPotential(firstAtom, secondAtom);
                 }
             }
 
             StaticVariables.currentTemperature = StaticVariables.kineticEnergy / 1.5f / (float)Atom.AllAtoms.Count / StaticVariables.kB;
             calculateSqrtAlpha();
-
         }
 
         //this function calculates the coefficient that scales the velocity of atoms to conserve the temperature

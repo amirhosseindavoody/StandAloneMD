@@ -27,7 +27,7 @@ namespace StandAloneMD
         {
             if ((StaticVariables.iTime % StaticVariables.nVerlet == 0) && (StaticVariables.iTime > 20000))
             {
-                normCoefficient = StaticVariables.myEnvironment.volume * StaticVariables.myEnvironment.volume / (Atom.AllAtoms.Count * 4.0f * (float)Math.PI * dR * dR * dR );
+                normCoefficient = CreateEnvironment.myEnvironment.volume * CreateEnvironment.myEnvironment.volume / (Atom.AllAtoms.Count * 4.0f * (float)Math.PI * dR * dR * dR);
                 updatePairDistribution();
                 for (int iR = 0; iR < pairDistribution.Length; iR++)
                 {
