@@ -54,7 +54,8 @@ namespace StandAloneMD
 		}
 
 		// method to extract the list of allMolecules
-		public static List<Atom> AllAtoms { 
+		public static List<Atom> AllAtoms
+        { 
 			get
 			{
 				return m_AllAtoms;

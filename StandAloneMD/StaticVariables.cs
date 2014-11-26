@@ -58,7 +58,7 @@ namespace StandAloneMD
         public static float desiredTemperature = 300.0f;
 
 		//this varaible keeps track of the current potential that is being used. (Note: only Lennard-Jones is currently implemented)
-		public static Potential currentPotential = Potential.Buckingham;
+		public static Potential currentPotential = Potential.LennardJones;
 		
 		//There are three potentials, but currently Lennard-Jones is the only one that is implemented so changing
 		//between these potentials doesnt do anything

@@ -18,18 +18,12 @@ namespace StandAloneMD
                 currAtom.accelerationNew = new float[3] { 0.0f, 0.0f, 0.0f };
 			}
 
-            /*
-            for (int j = i+1; j < Atom.AllAtoms.Count; j++)
-            {
-                Atom secondAtom = Atom.AllAtoms[j];
-                LennardJones.getForce(firstAtom, secondAtom);
-            }
-            */
-
             if (StaticVariables.currentPotential == StaticVariables.Potential.LennardJones)
             {
                 if (StaticVariables.iTime % StaticVariables.nVerlet == 0)
+                {
                     LennardJones.calculateNeighborList();
+                }
                 // update the acceleration of all atoms
 			    for (int i=0; i< Atom.AllAtoms.Count-1; i++) {
 				    Atom firstAtom = Atom.AllAtoms[i];
@@ -42,7 +36,9 @@ namespace StandAloneMD
             else if (StaticVariables.currentPotential == StaticVariables.Potential.Buckingham)
             {
                 if (StaticVariables.iTime % StaticVariables.nVerlet == 0)
+                {
                     Buckingham.calculateNeighborList();
+                }
                 // update the acceleration of all atoms
 			    for (int i=0; i< Atom.AllAtoms.Count-1; i++) {
 				    Atom firstAtom = Atom.AllAtoms[i];
@@ -110,14 +106,6 @@ namespace StandAloneMD
                 StaticVariables.kineticEnergy += 0.5f * firstAtom.massamu * StaticVariables.amuToKg * velocitySqr * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters;
 
                 // calculate potential energy between each pair of atoms
-                /*
-                for (int j = i + 1; j < Atom.AllAtoms.Count; j++)
-                {
-                    Atom secondAtom = Atom.AllAtoms[j];
-                    StaticVariables.potentialEnergy += LennardJones.getPotential(firstAtom, secondAtom);
-                }
-                */
-
                 if (StaticVariables.currentPotential == StaticVariables.Potential.LennardJones)
                 {
                     for (int j = 0; j < firstAtom.neighborList.Count; j++)

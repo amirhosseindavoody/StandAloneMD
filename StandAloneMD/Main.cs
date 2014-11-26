@@ -8,57 +8,40 @@ namespace StandAloneMD
 	{
 		public static void Main (string[] args)
 		{
+            WriteData myData = new WriteData();
+
             StaticVariables.myEnvironment = new CreateEnvironment();
             StaticVariables.myEnvironment.PreCompute ();
             StaticVariables.myEnvironment.InitAtoms ();
+
             if (StaticVariables.currentPotential == StaticVariables.Potential.LennardJones)
                 LennardJones.calculateVerletRadius();
             if (StaticVariables.currentPotential == StaticVariables.Potential.Buckingham)
                 Buckingham.calculateVerletRadius();
 
             Console.WriteLine("Number of atoms = " + StaticVariables.myEnvironment.numAtoms);
-            //Console.ReadLine();
 
-            //float totalTime = 100.0f * (float)Math.Pow(10, -12);
-            float totalTime = 20000.0f * StaticVariables.MDTimestep;
-            //int writeFlag = 01;
+            float totalTime = 40000.0f * StaticVariables.MDTimestep;
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            while (StaticVariables.currentTime < totalTime)
+            {            
+                PhysicsEngine.VelocityVerlet();
+                PhysicsEngine.ReflectFromWalls();
+                PhysicsEngine.CalculateEnergy();
+                PairDistributionFunction.calculatePairDistribution();
 
-            //using (StreamWriter file = new StreamWriter("position.txt"))
-            //{
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-                while (StaticVariables.currentTime < totalTime)
-                {
-                        
-                    PhysicsEngine.VelocityVerlet();
-                    PhysicsEngine.ReflectFromWalls();
-                    PhysicsEngine.CalculateEnergy();
-
-                    StaticVariables.currentTime = StaticVariables.currentTime + StaticVariables.MDTimestep;
-                    StaticVariables.iTime++;
-
-                    /*
-                    writeFlag--;
-                    if (writeFlag == 0)
-                    {
-                        for (int i = 0; i < Atom.AllAtoms.Count; i++)
-                        {
-                            file.WriteLine(Atom.AllAtoms[i].position[0] + "    " + Atom.AllAtoms[i].position[1] + "    " + Atom.AllAtoms[i].position[2] + "    " + StaticVariables.potentialEnergy + "    " + StaticVariables.kineticEnergy + "    " + StaticVariables.currentTemperature);
-                        }
-                        writeFlag = 20;
-                    }
-                    */ 
-                    
-
-
-                    //Console.WriteLine("iTime = " + StaticVariables.iTime + "            Current Time = " + StaticVariables.currentTime);
-
-                }
-                stopwatch.Stop();
-                Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
-                Console.WriteLine("iTime = " + StaticVariables.iTime + "            Current Time = " + StaticVariables.currentTime);
-                Console.ReadLine();
-            //}
+                StaticVariables.currentTime = StaticVariables.currentTime + StaticVariables.MDTimestep;
+                StaticVariables.iTime++;
+                myData.WritePosition();
+                //Console.WriteLine("iTime = " + StaticVariables.iTime);
+            }
+            
+            stopwatch.Stop();
+            myData.WritePairDistribution();
+            Console.WriteLine("iTime = " + StaticVariables.iTime + "            Current Time = " + StaticVariables.currentTime);
+            Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
+            Console.ReadLine();
 		}
 	}
 }

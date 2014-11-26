@@ -21,10 +21,10 @@ namespace StandAloneMD
 {
 	public class CreateEnvironment
 	{
-		public int numAtoms = 100;
-		public float width = 30.0f;
-		public float height = 30.0f;
-		public float depth = 30.0f;
+		public int numAtoms = 1000;
+		public float width;
+		public float height;
+		public float depth;
 		public float volume;
 		private Random rnd = new Random();
 
@@ -49,6 +49,12 @@ namespace StandAloneMD
 		//initialize the atoms to a random position and to the original number of atoms
         public void InitAtoms()
 		{
+            //set the values for the initialization of atoms, this will later change to the real box size
+            width = 30.0f;
+            depth = 30.0f;
+            height = 30.0f;
+            volume = width * depth * height;
+
             if (StaticVariables.currentPotential == StaticVariables.Potential.LennardJones)
             {
                 for (int i = 0; i < numAtoms; i++)
@@ -92,6 +98,12 @@ namespace StandAloneMD
                     }
                 }
             }
+
+            //now, set the values for the real box size which will be used to reflect atoms from walls.
+            width = 30.0f;
+            depth = 30.0f;
+            height = 30.0f;
+            volume = width * depth * height;
 
 		}
         
