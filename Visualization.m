@@ -2,9 +2,10 @@
 % close all;
 clear all;
 clc;
-fig = 20;
+fig = 10;
 eV = 1.6e-19;
 numAtom = 10;
+directory = 'C:\Amirhossein\StandAloneMD\Test Run\1000Atoms - 5000 Kelvin - LennardJones\';
 %%
 % filename = 'C:\Amirhossein\StandAloneMD\StandAloneMD\bin\Debug\force.txt';
 % rawForce = load (filename);
@@ -15,8 +16,8 @@ numAtom = 10;
 % plot(rawForce,'LineWidth',3);
 
 %% Plot pair distribution
-filename = 'C:\Amirhossein\StandAloneMD\StandAloneMD\bin\Release\pairDistribution.txt';
-pairDistribution = load (filename);
+filename = 'pairDistribution.txt';
+pairDistribution = load ([directory filename]);
 
 %plot kinetic, potential, and total energy of system
 fig=fig+1; figure(fig);
@@ -25,8 +26,8 @@ axis tight;
 return;
 
 %% Plot energy
-filename = 'C:\Amirhossein\StandAloneMD\StandAloneMD\bin\Release\energy.txt';
-energy = load (filename);
+filename = 'energy.txt';
+energy = load ([directory filename]);
 
 %plot kinetic, potential, and total energy of system
 fig=fig+1; figure(fig);
@@ -37,8 +38,8 @@ axis tight;
 % return;
 
 %% Plot temperature
-filename = 'C:\Amirhossein\StandAloneMD\StandAloneMD\bin\Release\temperature.txt';
-temperature = load (filename);
+filename = 'temperature.txt';
+temperature = load ([directory filename]);
 
 %plot temperature of the gas
 fig=fig+1; figure(fig);
@@ -47,8 +48,8 @@ axis tight;
 return;
 
 %% visulize atom movements
-filename = 'C:\Amirhossein\StandAloneMD\StandAloneMD\bin\Release\position.txt';
-position = load (filename);
+filename = 'position.txt';
+position = load ([directory filename]);
 nTime = size(position,1)/numAtom;
 
 Max = +15;

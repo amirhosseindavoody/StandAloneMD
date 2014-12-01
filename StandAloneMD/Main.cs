@@ -17,7 +17,7 @@ namespace StandAloneMD
 
             Console.WriteLine("Number of atoms = " + CreateEnvironment.myEnvironment.numAtoms);
 
-            float totalTime = 20000.0f * StaticVariables.MDTimestep;
+            float totalTime = 40000.0f * StaticVariables.MDTimestep;
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             while (StaticVariables.currentTime < totalTime)

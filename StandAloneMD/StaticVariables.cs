@@ -55,7 +55,7 @@ namespace StandAloneMD
 		//Temperature slider bounds in K
 		public static float tempRangeLow = 0.01f;
 		public static float tempRangeHigh = 5000.0f;
-        public static float desiredTemperature = 300.0f;
+        public static float desiredTemperature = 5000.0f;
 
         public static float kineticEnergy = 0.0f;  // units in Joules
         public static float potentialEnergy = 0.0f;  // units in Joules
