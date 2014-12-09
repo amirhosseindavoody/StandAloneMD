@@ -119,9 +119,8 @@ namespace StandAloneMD
 		}
         
 
-        //initialize the atoms to a random position and to the original number of atoms
-        /*
-        public void InitAtoms()
+        //initialize two atoms to fixed positions for debuging perposes.
+        public void InitAtomsDebug()
         {
             Atom copperAtom = new Copper();
             copperAtom.velocity = new float[] { 0.0f, 0.0f, 0.0f };
@@ -130,8 +129,12 @@ namespace StandAloneMD
             Atom goldAtom = new Gold();
             goldAtom.velocity = new float[] { 0.0f, 0.0f, 0.0f };
             goldAtom.position = new float[] { +1.5f, 0.0f, 0.0f };
+
+            width = 10.0f;
+            depth = 10.0f;
+            height = 10.0f;
+            volume = width * depth * height;
         }
-        */
 
         //this method generates a random float number between the minValue and maxValue
         private float randomFloat(float minValue, float maxValue)

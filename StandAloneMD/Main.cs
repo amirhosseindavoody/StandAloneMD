@@ -12,7 +12,8 @@ namespace StandAloneMD
 
             CreateEnvironment.myEnvironment = new CreateEnvironment();
             CreateEnvironment.myEnvironment.PreCompute();
-            CreateEnvironment.myEnvironment.InitAtoms();
+            //CreateEnvironment.myEnvironment.InitAtoms();
+            CreateEnvironment.myEnvironment.InitAtomsDebug();
             Potential.myPotential.calculateVerletRadius();
 
             Console.WriteLine("Number of atoms = " + CreateEnvironment.myEnvironment.numAtoms);
@@ -25,7 +26,7 @@ namespace StandAloneMD
                 PhysicsEngine.VelocityVerlet();
                 PhysicsEngine.ReflectFromWalls();
                 PhysicsEngine.CalculateEnergy();
-                PairDistributionFunction.calculatePairDistribution();
+                //PairDistributionFunction.calculatePairDistribution();
 
                 StaticVariables.currentTime = StaticVariables.currentTime + StaticVariables.MDTimestep;
                 StaticVariables.iTime++;
@@ -33,7 +34,7 @@ namespace StandAloneMD
             }
             
             stopwatch.Stop();
-            myData.WritePairDistribution();
+            //myData.WritePairDistribution();
             Console.WriteLine("iTime = " + StaticVariables.iTime + "            Current Time = " + StaticVariables.currentTime);
             Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
             Console.ReadLine();

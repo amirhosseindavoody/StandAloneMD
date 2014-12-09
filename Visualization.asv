@@ -16,16 +16,17 @@ for i = 1:m
     plot(myPotential(:,i),'-b','LineWidth',3); hold on;
 end;
 axis tight;
-% return;
+return;
 
 %% Plot force
 filename = 'force.txt';
-myForce = load ([directory filename]);
-[nR,m] = size(myForce);
+myPotential = load ([directory filename]);
+[nR,m] = size(myPotential);
 
+%plot kinetic, potential, and total energy of system
 fig=fig+1; figure(fig);
 for i = 1:m
-    plot(myForce(:,i),'-b','LineWidth',3); hold on;
+    plot(myPotential(:,i),'-b','LineWidth',3); hold on;
 end;
 axis tight;
 return;
@@ -54,6 +55,7 @@ axis tight;
 filename = 'temperature.txt';
 temperature = load ([directory filename]);
 
+%plot temperature of the gas
 fig=fig+1; figure(fig);
 plot(temperature(:,1),'-b','LineWidth',3);
 axis tight;

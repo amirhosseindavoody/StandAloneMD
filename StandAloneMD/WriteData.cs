@@ -47,5 +47,31 @@ namespace StandAloneMD
                 pairDistributionFile.WriteLine(PairDistributionFunction.PairDistributionAverage[i]);
             }
         }
+
+        public static void WritePotential(float[,,] myPotential)
+        {
+            StreamWriter potentialFile;
+            potentialFile = new StreamWriter("potential.txt");
+            int numAtomTypes = myPotential.GetLength(0);
+            int nR = myPotential.GetLength(2);
+
+            for (int iR = 0; iR < nR; iR++)
+            {
+                potentialFile.WriteLine(myPotential[0,0,iR] + "     " + myPotential[0,1,iR] + "     " + myPotential[1,0,iR] + "     " + myPotential[1,1,iR]);
+            }
+        }
+
+        public static void WriteForce(float[, ,] myForce)
+        {
+            StreamWriter forceFile;
+            forceFile = new StreamWriter("force.txt");
+            int numAtomTypes = myForce.GetLength(0);
+            int nR = myForce.GetLength(2);
+
+            for (int iR = 0; iR < nR; iR++)
+            {
+                forceFile.WriteLine(myForce[0, 0, iR] + "     " + myForce[0, 1, iR] + "     " + myForce[1, 0, iR] + "     " + myForce[1, 1, iR]);
+            }
+        }
     }
 }

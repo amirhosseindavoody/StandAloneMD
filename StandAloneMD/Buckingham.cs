@@ -12,10 +12,10 @@ namespace StandAloneMD
         private float cutoffSqr;
 
         //Cutoff distance for using the spline interpolation function. Beyond this distance the force smoothed to zero.
-        private float rSpline = 7.0f; //[Angstrom]
+        private float rSpline; //[Angstrom]
 
         //The mesh size for pre-calculating Lennard Jones force.
-        private float dR = 0.00001f;
+        private float dR = 0.001f;
 
         //pre-calculated coefficients and forces for Buckingham potential
         private float[, ,] preBuckinghamAcceleration;
@@ -29,6 +29,7 @@ namespace StandAloneMD
         public Buckingham()
         {
             cutoffSqr = cutoff * cutoff;
+            rSpline = cutoff - 2.0f;
         }
 
         public override void preCompute()
@@ -68,6 +69,8 @@ namespace StandAloneMD
                     }
                 }
             }
+            WriteData.WritePotential(PreBuckinghamPotential);
+            WriteData.WriteForce(preBuckinghamAcceleration);
         }
 
         //the function returns the LennarJones force on the atom given the list of the atoms that are within range of it
@@ -81,7 +84,7 @@ namespace StandAloneMD
             float invrSpline2 = 1.0f / rSpline / rSpline;
             float invrSpline6 = invrSpline2 * invrSpline2 * invrSpline2;
             float invrSpline7 = invrSpline6 / rSpline;
-            float invrSpline8 = invrSpline6 * invrSpline2;
+            float invrSpline8 = invrSpline7 / rSpline;
             float invrSpline9 = invrSpline8 / rSpline;
             
             float A = coeff_A [firstAtom.atomID,secondAtom.atomID];
@@ -91,7 +94,7 @@ namespace StandAloneMD
 
             float y1 = A * (float)Math.Exp(-B * rSpline) - C * invrSpline6 - D * invrSpline8 + firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) / rSpline;
             float y2 = 0.0f;
-            float k1 = -A * B * (float)Math.Exp(-B * rSpline) / StaticVariables.angstromsToMeters + 6.0f * C * invrSpline7 / StaticVariables.angstromsToMeters + 8.0f * D * invrSpline9 / StaticVariables.angstromsToMeters - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters) * invrSpline2;
+            float k1 = -A * B * (float)Math.Exp(-B * rSpline) + 6.0f * C * invrSpline7 + 8.0f * D * invrSpline9 - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) * invrSpline2; //units of this derivative is [J/Angstrom]
             float k2 = 0;
 
             float uPrime_r = 0.0f;
@@ -102,15 +105,15 @@ namespace StandAloneMD
             else if (distance <= cutoff)
             {
                 float t = (distance - rSpline) / (cutoff - rSpline);
-                float a = +k1 * (cutoff - rSpline) - (cutoff - rSpline);
-                float b = -k2 * (cutoff - rSpline) + (cutoff - rSpline);
+                float a = +k1 * (cutoff - rSpline) - (y2 - y1);
+                float b = -k2 * (cutoff - rSpline) + (y2 - y1);
                 uPrime_r = (- y1 + y2 + (1-2.0f * t) * (a*(1.0f - t)+b*t) + (t-t*t)*(b-a)) / (cutoff - rSpline) / StaticVariables.angstromsToMeters;
             }
             else
             {
                 uPrime_r = 0.0f;
             }
-
+            
             //float forceMagnitude = -1.0f * uPrime_r / distance + uPrime_rc / cutoff;
             float forceMagnitude = -1.0f * uPrime_r / distance;
             float acceleration = forceMagnitude / (firstAtom.massamu * StaticVariables.amuToKg * StaticVariables.angstromsToMeters); //Units of [1 / second^2] when multiplied by deltaR gets units of [Angstrom / second^2]
@@ -138,11 +141,11 @@ namespace StandAloneMD
 
             float y1 = A * (float)Math.Exp(-B * rSpline) - C * invrSpline6 - D * invrSpline8 + firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) / rSpline;
             float y2 = 0.0f;
-            float k1 = -A * B * (float)Math.Exp(-B * rSpline) / StaticVariables.angstromsToMeters + 6.0f * C * invrSpline7 / StaticVariables.angstromsToMeters + 8.0f * D * invrSpline9 / StaticVariables.angstromsToMeters - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters) * invrSpline2;
+            float k1 = -A * B * (float)Math.Exp(-B * rSpline) + 6.0f * C * invrSpline7 + 8.0f * D * invrSpline9 - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) * invrSpline2; //units of this derivative is [J/Angstrom]
             float k2 = 0;
 
             float u_r = 0.0f;
-
+            
             if (distance <= rSpline)
             {
                 u_r = A * (float)Math.Exp(-B * distance) - C * invDistance6 - D * invDistance8 + firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) / distance;
@@ -150,15 +153,15 @@ namespace StandAloneMD
             else if (distance <= cutoff)
             {
                 float t = (distance - rSpline) / (cutoff - rSpline);
-                float a = +k1 * (cutoff - rSpline) - (cutoff - rSpline);
-                float b = -k2 * (cutoff - rSpline) + (cutoff - rSpline);
+                float a = +k1 * (cutoff - rSpline) - (y2 - y1);
+                float b = -k2 * (cutoff - rSpline) + (y2 - y1);
                 u_r = (1.0f - t) * y1 + t * y2 + t * (1.0f - t) * (a * (1.0f - t) + b * t);
             }
             else
             {
                 u_r = 0.0f;
             }
-
+            
             float potential = u_r; //Units of Joules
             return potential;
         }
