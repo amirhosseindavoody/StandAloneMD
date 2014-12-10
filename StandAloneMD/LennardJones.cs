@@ -122,14 +122,7 @@ namespace StandAloneMD
         //the function returns the Lennard-Jones force on the atom given the list of all the atoms in the simulation
         public override void getForce(Atom firstAtom, Atom secondAtom)
         {
-            float[] firstAtomAcceleration = new float[3];
-            float[] secondAtomAcceleration = new float[3];
-
-            float[] deltaR = new float[3];
-            for (int idx = 0; idx < 3; idx++)
-            {
-                deltaR[idx] = firstAtom.position[idx] - secondAtom.position[idx];
-            }
+            float[] deltaR = Boundary.deltaPosition(firstAtom,secondAtom);
             float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
             float finalSigma = sigmaValues[firstAtom.atomID, secondAtom.atomID];
             float normDistanceSqr = distanceSqr / finalSigma / finalSigma; // this is normalized distanceSqr to the sigmaValue
@@ -150,11 +143,7 @@ namespace StandAloneMD
         public override float getPotential(Atom firstAtom, Atom secondAtom)
         {
             float potential = 0.0f;
-            float[] deltaR = new float[3];
-            for (int idx = 0; idx < 3; idx++)
-            {
-                deltaR[idx] = firstAtom.position[idx] - secondAtom.position[idx];
-            }
+            float[] deltaR = Boundary.deltaPosition(firstAtom,secondAtom);
             float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
             float finalSigma = sigmaValues[firstAtom.atomID, secondAtom.atomID];
             float normDistanceSqr = distanceSqr / finalSigma / finalSigma; // this is normalized distanceSqr to the sigmaValue
@@ -170,26 +159,6 @@ namespace StandAloneMD
 
         public override void calculateVerletRadius()
         {
-            // find the the minimum mass of an atom
-            /*
-            float minMassAmu = 10000.0f;
-            for (int i = 0; i < Atom.templateAtoms.Count - 1; i++)
-            {
-                Atom currAtom = Atom.templateAtoms[i];
-                if (minMassAmu > currAtom.massamu)
-                {
-                    minMassAmu = currAtom.massamu;
-                }
-            }
-            float averageVelocity = (float)Math.Sqrt(3.0f * StaticVariables.kB * StaticVariables.desiredTemperature / minMassAmu / StaticVariables.amuToKg) / StaticVariables.angstromsToMeters;
-
-            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
-            {
-                Atom currAtom = Atom.AllAtoms[i];
-                currAtom.verletRadius = cutoff + 15.0f * (float)StaticVariables.nVerlet * averageVelocity * StaticVariables.MDTimestep / currAtom.sigma;
-            }
-            */
-
             for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
             {
                 Atom currAtom = Atom.AllAtoms[i];
@@ -198,36 +167,12 @@ namespace StandAloneMD
         }
 
         //This function creates a list of all neighbor list for each atom
-        public override void calculateNeighborList()
+        public override void calculateNeighborList(float distance, Atom firstAtom, Atom secondAtom)
         {
-            //clear the old neighborList
-            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
-            {
-                Atom currAtom = Atom.AllAtoms[i];
-                currAtom.neighborList.Clear();
-            }
-
-            //create the new neighborList
-            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
-            {
-                Atom firstAtom = Atom.AllAtoms[i];
-                for (int j = i + 1; j < Atom.AllAtoms.Count; j++)
-                {
-                    Atom secondAtom = Atom.AllAtoms[j];
-                    float[] deltaR = new float[3];
-                    for (int idx = 0; idx < 3; idx++)
-                    {
-                        deltaR[idx] = firstAtom.position[idx] - secondAtom.position[idx];
-                    }
-                    float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
-                    float finalSigma = sigmaValues[firstAtom.atomID, secondAtom.atomID];
-                    float normDistanceSqr = distanceSqr / finalSigma / finalSigma; // this is normalized distanceSqr to the sigmaValue
-                    if (normDistanceSqr < (firstAtom.verletRadius * firstAtom.verletRadius))
-                    {
-                        firstAtom.neighborList.Add(secondAtom);
-                    }
-                }
-            }
+            float finalSigma = sigmaValues[firstAtom.atomID, secondAtom.atomID];
+            float normDistance = distance / finalSigma; // this is normalized distanceSqr to the sigmaValue
+            if (normDistance < firstAtom.verletRadius)
+                firstAtom.neighborList.Add(secondAtom);
         }
     }
 }

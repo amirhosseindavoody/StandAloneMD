@@ -18,10 +18,8 @@ namespace StandAloneMD
                 currAtom.accelerationNew = new float[3] { 0.0f, 0.0f, 0.0f };
 			}
 
-            if (StaticVariables.iTime % StaticVariables.nVerlet == 0)
-            {
-                Potential.myPotential.calculateNeighborList();
-            }
+            updateNeighborList();
+            
             // update the acceleration of all atoms
             for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
             {
@@ -45,33 +43,31 @@ namespace StandAloneMD
             }
 		}
 
-		
-
-        //reflect the atoms from the walls
-        public static void ReflectFromWalls()
+        private static void updateNeighborList()
         {
-            float[] boxDimension = new float[3] { CreateEnvironment.myEnvironment.depth, CreateEnvironment.myEnvironment.width, CreateEnvironment.myEnvironment.height };
-            
-            for (int i = 0; i < Atom.AllAtoms.Count; i++)
+            if (StaticVariables.iTime % StaticVariables.nVerlet == 0)
             {
-                Atom currAtom = Atom.AllAtoms[i];
-                for (int idx = 0; idx < 3; idx++)
+                //clear the old neighborList
+                for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
                 {
-                    float sign = Math.Sign(currAtom.position[idx]);
-                    float firstRemainder = ((Math.Abs(currAtom.position[idx]) + boxDimension[idx]/2.0f) % (2.0f * boxDimension[idx]));
-                    if (firstRemainder < boxDimension[idx])
-                    {
-                        currAtom.position[idx] = firstRemainder - boxDimension[idx] / 2.0f;
-                        currAtom.velocity[idx] = currAtom.velocity[idx];
-                    }
-                    else
-                    {
-                        currAtom.position[idx] = 3.0f * boxDimension[idx] / 2.0f - firstRemainder;
-                        currAtom.velocity[idx] = -1.0f * currAtom.velocity[idx];
-                    }
-                    currAtom.position[idx] = sign * currAtom.position[idx];
+                    Atom currAtom = Atom.AllAtoms[i];
+                    currAtom.neighborList.Clear();
                 }
-                
+
+                //create the new neighborList
+                for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
+                {
+                    Atom firstAtom = Atom.AllAtoms[i];
+                    for (int j = i + 1; j < Atom.AllAtoms.Count; j++)
+                    {
+                        Atom secondAtom = Atom.AllAtoms[j];
+                        float[] deltaR = Boundary.deltaPosition(firstAtom, secondAtom);
+                        float distance = (float)Math.Sqrt(deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2]);
+                        Potential.myPotential.calculateNeighborList(distance, firstAtom, secondAtom);
+                        PairDistributionFunction.updatePairDistribution(distance);
+                    }
+                }
+                PairDistributionFunction.calculateAveragePairDistribution();
             }
         }
 

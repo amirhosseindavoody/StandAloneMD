@@ -23,43 +23,22 @@ namespace StandAloneMD
             }
         }
 
-        public static void calculatePairDistribution()
+        public static void calculateAveragePairDistribution()
         {
-            if ((StaticVariables.iTime % StaticVariables.nVerlet == 0) && (StaticVariables.iTime > 20000))
+            normCoefficient = CreateEnvironment.myEnvironment.volume / ((float)Atom.AllAtoms.Count * (float)Atom.AllAtoms.Count * 4.0f * (float)Math.PI * dR * dR * dR);
+            for (int iR = 0; iR < pairDistribution.Length; iR++)
             {
-                normCoefficient = CreateEnvironment.myEnvironment.volume * CreateEnvironment.myEnvironment.volume / (Atom.AllAtoms.Count * 4.0f * (float)Math.PI * dR * dR * dR);
-                updatePairDistribution();
-                for (int iR = 0; iR < pairDistribution.Length; iR++)
-                {
-                    pairDistributionAverage[iR] = (pairDistributionAverage[iR] * numberOfCalculations + pairDistribution[iR] * (normCoefficient / (float)iR / (float)iR));
-                    numberOfCalculations++;
-                    pairDistributionAverage[iR] = pairDistributionAverage[iR] / numberOfCalculations;
-                }
+                pairDistributionAverage[iR] = (pairDistributionAverage[iR] * numberOfCalculations + pairDistribution[iR] * normCoefficient / (float)iR / (float)iR);
+                numberOfCalculations++;
+                pairDistributionAverage[iR] = pairDistributionAverage[iR] / numberOfCalculations;
             }
         }
 
-        private static void updatePairDistribution()
+        public static void updatePairDistribution(float distance)
         {
             pairDistribution.Initialize();
-
-            //create the new neighborList
-            for (int i = 0; i < Atom.AllAtoms.Count-1; i++)
-            {
-                Atom firstAtom = Atom.AllAtoms[i];
-                for (int j = i+1; j < Atom.AllAtoms.Count; j++)
-                {
-
-                    Atom secondAtom = Atom.AllAtoms[j];
-                    float[] deltaR = new float[3];
-                    for (int idx = 0; idx < 3; idx++)
-                    {
-                        deltaR[idx] = firstAtom.position[idx] - secondAtom.position[idx];
-                    }
-                    float distance = (float) Math.Sqrt(deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2]);
-                    int iR = (int)(distance / dR);
-                    pairDistribution[iR]++;
-                }
-            }
+            int iR = (int)Math.Floor(distance / dR);
+            pairDistribution[iR] += 2.0f;
         }
     }
 }

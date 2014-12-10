@@ -79,7 +79,7 @@ namespace StandAloneMD
             float invDistance2 = 1.0f / distance / distance;
             float invDistance6 = invDistance2 * invDistance2 * invDistance2;
             float invDistance7 = invDistance6 / distance;
-            float invDistance8 = invDistance2 * invDistance2 * invDistance2 * invDistance2;
+            float invDistance8 = invDistance7 / distance;
             float invDistance9 = invDistance8 / distance;
             float invrSpline2 = 1.0f / rSpline / rSpline;
             float invrSpline6 = invrSpline2 * invrSpline2 * invrSpline2;
@@ -95,7 +95,7 @@ namespace StandAloneMD
             float y1 = A * (float)Math.Exp(-B * rSpline) - C * invrSpline6 - D * invrSpline8 + firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) / rSpline;
             float y2 = 0.0f;
             float k1 = -A * B * (float)Math.Exp(-B * rSpline) + 6.0f * C * invrSpline7 + 8.0f * D * invrSpline9 - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) * invrSpline2; //units of this derivative is [J/Angstrom]
-            float k2 = 0;
+            float k2 = 0.0f;
 
             float uPrime_r = 0.0f;
             if (distance <= rSpline)
@@ -126,12 +126,11 @@ namespace StandAloneMD
             float invDistance2 = 1.0f / distance / distance;
             float invDistance6 = invDistance2 * invDistance2 * invDistance2;
             float invDistance7 = invDistance6 / distance;
-            float invDistance8 = invDistance2 * invDistance2 * invDistance2 * invDistance2;
-            float invDistance9 = invDistance8 / distance;
+            float invDistance8 = invDistance7 / distance;
             float invrSpline2 = 1.0f / rSpline / rSpline;
             float invrSpline6 = invrSpline2 * invrSpline2 * invrSpline2;
             float invrSpline7 = invrSpline6 / rSpline;
-            float invrSpline8 = invrSpline6 * invrSpline2;
+            float invrSpline8 = invrSpline7 / rSpline;
             float invrSpline9 = invrSpline8 / rSpline;
 
             float A = coeff_A[firstAtom.atomID, secondAtom.atomID];
@@ -142,7 +141,7 @@ namespace StandAloneMD
             float y1 = A * (float)Math.Exp(-B * rSpline) - C * invrSpline6 - D * invrSpline8 + firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) / rSpline;
             float y2 = 0.0f;
             float k1 = -A * B * (float)Math.Exp(-B * rSpline) + 6.0f * C * invrSpline7 + 8.0f * D * invrSpline9 - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) * invrSpline2; //units of this derivative is [J/Angstrom]
-            float k2 = 0;
+            float k2 = 0.0f;
 
             float u_r = 0.0f;
             
@@ -172,11 +171,7 @@ namespace StandAloneMD
             float[] firstAtomAcceleration = new float[3];
             float[] secondAtomAcceleration = new float[3];
 
-            float[] deltaR = new float[3];
-            for (int idx = 0; idx < 3; idx++)
-            {
-                deltaR[idx] = firstAtom.position[idx] - secondAtom.position[idx];
-            }
+            float[] deltaR = Boundary.deltaPosition(firstAtom,secondAtom);
             float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
 
             //only get the forces of the atoms that are within the cutoff range
@@ -195,11 +190,7 @@ namespace StandAloneMD
         public override float getPotential(Atom firstAtom, Atom secondAtom)
         {
             float potential = 0.0f;
-            float[] deltaR = new float[3];
-            for (int idx = 0; idx < 3; idx++)
-            {
-                deltaR[idx] = firstAtom.position[idx] - secondAtom.position[idx];
-            }
+            float[] deltaR = Boundary.deltaPosition(firstAtom,secondAtom);
             float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
 
             //only get the forces of the atoms that are within the cutoff range
@@ -221,34 +212,10 @@ namespace StandAloneMD
         }
 
         //This function creates a list of all neighbor list for each atom
-        public override void calculateNeighborList()
+        public override void calculateNeighborList(float distance, Atom firstAtom, Atom secondAtom)
         {
-            //clear the old neighborList
-            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
-            {
-                Atom currAtom = Atom.AllAtoms[i];
-                currAtom.neighborList.Clear();
-            }
-
-            //create the new neighborList
-            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
-            {
-                Atom firstAtom = Atom.AllAtoms[i];
-                for (int j = i + 1; j < Atom.AllAtoms.Count; j++)
-                {
-                    Atom secondAtom = Atom.AllAtoms[j];
-                    float[] deltaR = new float[3];
-                    for (int idx = 0; idx < 3; idx++)
-                    {
-                        deltaR[idx] = firstAtom.position[idx] - secondAtom.position[idx];
-                    }
-                    float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
-                    if (distanceSqr < (firstAtom.verletRadius * firstAtom.verletRadius))
-                    {
-                        firstAtom.neighborList.Add(secondAtom);
-                    }
-                }
-            }
+            if (distance < firstAtom.verletRadius)
+                firstAtom.neighborList.Add(secondAtom);
         }
     }
 }

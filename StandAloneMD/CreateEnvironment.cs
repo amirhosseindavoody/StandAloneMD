@@ -21,7 +21,7 @@ namespace StandAloneMD
 {
 	public class CreateEnvironment
 	{
-		public int numAtoms = 10;
+		public int numAtoms = 2000;
 		public float width;
 		public float height;
 		public float depth;
@@ -61,9 +61,9 @@ namespace StandAloneMD
         public void InitAtoms()
 		{
             //set the values for the initialization of atoms, this will later change to the real box size
-            width = 10.0f;
-            depth = 10.0f;
-            height = 10.0f;
+            width = 35.0f;
+            depth = width;
+            height = width;
             volume = width * depth * height;
 
             if (Potential.currentPotential == Potential.potentialType.LennardJones)
@@ -111,9 +111,9 @@ namespace StandAloneMD
             }
 
             //now, set the values for the real box size which will be used to reflect atoms from walls.
-            width = 10.0f;
-            depth = 10.0f;
-            height = 10.0f;
+            width = 35.0f;
+            depth = width;
+            height = width;
             volume = width * depth * height;
 
 		}
@@ -131,8 +131,8 @@ namespace StandAloneMD
             goldAtom.position = new float[] { +1.5f, 0.0f, 0.0f };
 
             width = 10.0f;
-            depth = 10.0f;
-            height = 10.0f;
+            depth = width;
+            height = width;
             volume = width * depth * height;
         }
 
@@ -151,11 +151,7 @@ namespace StandAloneMD
             {
                 float minDistance = 2.0f;
                 Atom otherAtom = Atom.AllAtoms[i];
-                float[] deltaR = new float[3];
-                for (int idx = 0; idx < 3; idx++)
-                {
-                   deltaR[idx] = currAtom.position[idx] - otherAtom.position[idx];
-                }
+                float[] deltaR = Boundary.deltaPosition(currAtom, otherAtom);
                 float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
                 
                 if (distanceSqr < (minDistance * minDistance))
