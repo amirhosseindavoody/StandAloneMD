@@ -7,12 +7,15 @@ namespace StandAloneMD
 {
     class Buckingham
     {
-        //Cutoff distance for calculating LennarJones force. This quantity is unit less and normalized to sigmaValue for atom pair
-        public static float cutoff = 10.0f; //[Angstroms]
-        public static float cutoffSqr = cutoff * cutoff;
+        //Cutoff distance for calculating Buckingham force. Beyond this distance the force is taken to be zero.
+        private static float cutoff = 10.0f; //[Angstrom]
+        private static float cutoffSqr = cutoff * cutoff;
+
+        //Cutoff distance for using the spline interpolation function. Beyond this distance the force smoothed to zero.
+        private static float rSpline = cutoff - 2.0f; //[Angstrom]
 
         //The mesh size for pre-calculating Lennard Jones force.
-        private static float dR = 0.00001f;
+        private static float dR = 0.0001f;
 
         //pre-calculated coefficients and forces for Buckingham potential
         private static float[, ,] preBuckinghamAcceleration;
@@ -23,7 +26,7 @@ namespace StandAloneMD
         private static float[,] coeff_C = new float[3, 3];
         private static float[,] coeff_D = new float[3, 3];
 
-        public static void preBuckingham()
+        public static void preCompute()
         {
             // precalculate the LennardJones potential and store it in preLennarJones array.
             int nR = (int)(cutoff / dR) + 1;
@@ -70,21 +73,40 @@ namespace StandAloneMD
             float invDistance7 = invDistance6 / distance;
             float invDistance8 = invDistance2 * invDistance2 * invDistance2 * invDistance2;
             float invDistance9 = invDistance8 / distance;
-            float invCutoff2 = 1.0f / cutoff / cutoff;
-            float invCutoff6 = invCutoff2 * invCutoff2 * invCutoff2;
-            float invCutoff7 = invCutoff6 / cutoff;
-            float invCutoff8 = invCutoff2 * invCutoff2 * invCutoff2 * invCutoff2;
-            float invCutoff9 = invCutoff8 / cutoff;
-            
-            float A = coeff_A [firstAtom.atomID,secondAtom.atomID];
-            float B = coeff_B [firstAtom.atomID,secondAtom.atomID];
-            float C = coeff_C [firstAtom.atomID,secondAtom.atomID];
-            float D = coeff_D [firstAtom.atomID,secondAtom.atomID];
 
-            float uPrime_r = -A * B * (float)Math.Exp(-B * distance) / StaticVariables.angstromsToMeters + 6.0f * C * invDistance7 / StaticVariables.angstromsToMeters + 8.0f * D * invDistance9 / StaticVariables.angstromsToMeters - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters) * invDistance2;
-            float uPrime_rc = -A * B * (float)Math.Exp(-B * cutoff) / StaticVariables.angstromsToMeters + 6.0f * C * invCutoff7 / StaticVariables.angstromsToMeters + 8.0f * D * invCutoff9 / StaticVariables.angstromsToMeters - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters) * invCutoff2;
+            float invrSpline2 = 1.0f / rSpline / rSpline;
+            float invrSpline6 = invrSpline2 * invrSpline2 * invrSpline2;
+            float invrSpline7 = invrSpline6 / rSpline;
+            float invrSpline8 = invrSpline7 / rSpline;
+            float invrSpline9 = invrSpline8 / rSpline;
 
-            //float forceMagnitude = -1.0f * uPrime_r / distance + uPrime_rc / cutoff;
+            float A = coeff_A[firstAtom.atomID, secondAtom.atomID];
+            float B = coeff_B[firstAtom.atomID, secondAtom.atomID];
+            float C = coeff_C[firstAtom.atomID, secondAtom.atomID];
+            float D = coeff_D[firstAtom.atomID, secondAtom.atomID];
+
+            float y1 = A * (float)Math.Exp(-B * rSpline) - C * invrSpline6 - D * invrSpline8 + firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) / rSpline;
+            float y2 = 0.0f;
+            float k1 = -A * B * (float)Math.Exp(-B * rSpline) + 6.0f * C * invrSpline7 + 8.0f * D * invrSpline9 - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) * invrSpline2; //units of this derivative is [J/Angstrom]
+            float k2 = 0.0f;
+
+            float uPrime_r = 0.0f;
+            if (distance <= rSpline)
+            {
+                uPrime_r = -A * B * (float)Math.Exp(-B * distance) / StaticVariables.angstromsToMeters + 6.0f * C * invDistance7 / StaticVariables.angstromsToMeters + 8.0f * D * invDistance9 / StaticVariables.angstromsToMeters - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters) * invDistance2;
+            }
+            else if (distance <= cutoff)
+            {
+                float t = (distance - rSpline) / (cutoff - rSpline);
+                float a = +k1 * (cutoff - rSpline) - (y2 - y1);
+                float b = -k2 * (cutoff - rSpline) + (y2 - y1);
+                uPrime_r = (-y1 + y2 + (1 - 2.0f * t) * (a * (1.0f - t) + b * t) + (t - t * t) * (b - a)) / (cutoff - rSpline) / StaticVariables.angstromsToMeters;
+            }
+            else
+            {
+                uPrime_r = 0.0f;
+            }
+
             float forceMagnitude = -1.0f * uPrime_r / distance;
             float acceleration = forceMagnitude / (firstAtom.massamu * StaticVariables.amuToKg * StaticVariables.angstromsToMeters); //Units of [1 / second^2] when multiplied by deltaR gets units of [Angstrom / second^2]
             return acceleration;
@@ -98,24 +120,40 @@ namespace StandAloneMD
             float invDistance7 = invDistance6 / distance;
             float invDistance8 = invDistance2 * invDistance2 * invDistance2 * invDistance2;
             float invDistance9 = invDistance8 / distance;
-            float invCutoff2 = 1.0f / cutoff / cutoff;
-            float invCutoff6 = invCutoff2 * invCutoff2 * invCutoff2;
-            float invCutoff7 = invCutoff6 / cutoff;
-            float invCutoff8 = invCutoff2 * invCutoff2 * invCutoff2 * invCutoff2;
-            float invCutoff9 = invCutoff8 / cutoff;
+
+            float invrSpline2 = 1.0f / rSpline / rSpline;
+            float invrSpline6 = invrSpline2 * invrSpline2 * invrSpline2;
+            float invrSpline7 = invrSpline6 / rSpline;
+            float invrSpline8 = invrSpline7 / rSpline;
+            float invrSpline9 = invrSpline8 / rSpline;
 
             float A = coeff_A[firstAtom.atomID, secondAtom.atomID];
             float B = coeff_B[firstAtom.atomID, secondAtom.atomID];
             float C = coeff_C[firstAtom.atomID, secondAtom.atomID];
             float D = coeff_D[firstAtom.atomID, secondAtom.atomID];
 
-            float uPrime_r = -A * B * (float)Math.Exp(-B * distance) / StaticVariables.angstromsToMeters + 6.0f * C * invDistance7 / StaticVariables.angstromsToMeters + 8.0f * D * invDistance9 / StaticVariables.angstromsToMeters - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters) * invDistance2;
-            float uPrime_rc = -A * B * (float)Math.Exp(-B * cutoff) / StaticVariables.angstromsToMeters + 6.0f * C * invCutoff7 / StaticVariables.angstromsToMeters + 8.0f * D * invCutoff9 / StaticVariables.angstromsToMeters - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters) * invCutoff2;
+            float y1 = A * (float)Math.Exp(-B * rSpline) - C * invrSpline6 - D * invrSpline8 + firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) / rSpline;
+            float y2 = 0.0f;
+            float k1 = -A * B * (float)Math.Exp(-B * rSpline) + 6.0f * C * invrSpline7 + 8.0f * D * invrSpline9 - firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) * invrSpline2; //units of this derivative is [J/Angstrom]
+            float k2 = 0.0f;
 
-            float u_r = A * (float)Math.Exp(-B * distance) - C * invDistance6 - D * invDistance8 + firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) / distance;
-            float u_rc = A * (float)Math.Exp(-B * cutoff) - C * invCutoff6 - D * invCutoff8 + firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) / cutoff;
+            float u_r = 0.0f;
+            if (distance <= rSpline)
+            {
+                u_r = A * (float)Math.Exp(-B * distance) - C * invDistance6 - D * invDistance8 + firstAtom.Q_eff * secondAtom.Q_eff / (4.0f * StaticVariables.epsilon0 * (float)Math.PI * StaticVariables.angstromsToMeters) / distance;
+            }
+            else if (distance <= cutoff)
+            {
+                float t = (distance - rSpline) / (cutoff - rSpline);
+                float a = +k1 * (cutoff - rSpline) - (y2 - y1);
+                float b = -k2 * (cutoff - rSpline) + (y2 - y1);
+                u_r = (1.0f - t) * y1 + t * y2 + t * (1.0f - t) * (a * (1.0f - t) + b * t);
+            }
+            else
+            {
+                u_r = 0.0f;
+            }
 
-            //float potential = u_r - (uPrime_rc * cutoff * StaticVariables.angstromsToMeters / 2.0f) * (distance * distance / cutoff / cutoff) - u_rc + (uPrime_rc * cutoff * StaticVariables.angstromsToMeters / 2.0f) ; //Units of Joules
             float potential = u_r; //Units of Joules
             return potential;
         }

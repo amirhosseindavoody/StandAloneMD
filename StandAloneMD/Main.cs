@@ -8,7 +8,7 @@ namespace StandAloneMD
 	{
 		public static void Main (string[] args)
 		{
-            WriteData myData = new WriteData();
+            //WriteData myData = new WriteData();
 
             StaticVariables.myEnvironment = new CreateEnvironment();
             StaticVariables.myEnvironment.PreCompute ();
@@ -21,7 +21,7 @@ namespace StandAloneMD
 
             Console.WriteLine("Number of atoms = " + StaticVariables.myEnvironment.numAtoms);
 
-            float totalTime = 40000.0f * StaticVariables.MDTimestep;
+            float totalTime = 20000.0f * StaticVariables.MDTimestep;
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             while (StaticVariables.currentTime < totalTime)
@@ -33,12 +33,12 @@ namespace StandAloneMD
 
                 StaticVariables.currentTime = StaticVariables.currentTime + StaticVariables.MDTimestep;
                 StaticVariables.iTime++;
-                myData.WritePosition();
+                //myData.WritePosition();
                 //Console.WriteLine("iTime = " + StaticVariables.iTime);
             }
             
             stopwatch.Stop();
-            myData.WritePairDistribution();
+            //myData.WritePairDistribution();
             Console.WriteLine("iTime = " + StaticVariables.iTime + "            Current Time = " + StaticVariables.currentTime);
             Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
             Console.ReadLine();

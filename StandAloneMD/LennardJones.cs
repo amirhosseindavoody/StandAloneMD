@@ -28,7 +28,7 @@ namespace StandAloneMD
         private static float[] preLennardJonesPotential; //This is the pre-calculated value of LennardJones potential for some mesh points.
 
 
-        public static void preLennardJones()
+        public static void preCompute()
         {
             //precompute sigma and acceleration coefficient for the LJ potential
             for (int i = 0; i < Atom.templateAtoms.Count; i++)

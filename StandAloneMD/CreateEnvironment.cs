@@ -21,7 +21,7 @@ namespace StandAloneMD
 {
 	public class CreateEnvironment
 	{
-		public int numAtoms = 1000;
+		public int numAtoms = 100;
 		public float width;
 		public float height;
 		public float depth;
@@ -40,8 +40,10 @@ namespace StandAloneMD
                 Atom.AllAtoms.Clear();
             }
 
-            LennardJones.preLennardJones();
-            Buckingham.preBuckingham();
+            if (StaticVariables.currentPotential == StaticVariables.Potential.LennardJones)
+                LennardJones.preCompute();
+            if (StaticVariables.currentPotential == StaticVariables.Potential.Buckingham)
+                Buckingham.preCompute();
 		}
 
 
