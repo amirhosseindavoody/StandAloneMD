@@ -18,14 +18,12 @@ namespace StandAloneMD
                 currAtom.accelerationNew = new float[3] { 0.0f, 0.0f, 0.0f };
 			}
 
-            /*
+            
             if (StaticVariables.iTime % StaticVariables.nVerlet == 0)
             {
-                Potential.myPotential.calculateNeighborList(distance, firstAtom, secondAtom);
+                Potential.myPotential.calculateNeighborList();
             }
-             */
-
-            updateNeighborList();
+             
             
             // update the acceleration of all atoms
             for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
@@ -49,34 +47,6 @@ namespace StandAloneMD
                 }
             }
 		}
-
-        private static void updateNeighborList()
-        {
-            if (StaticVariables.iTime % StaticVariables.nVerlet == 0)
-            {
-                //clear the old neighborList
-                for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
-                {
-                    Atom currAtom = Atom.AllAtoms[i];
-                    currAtom.neighborList.Clear();
-                }
-
-                //create the new neighborList
-                for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
-                {
-                    Atom firstAtom = Atom.AllAtoms[i];
-                    for (int j = i + 1; j < Atom.AllAtoms.Count; j++)
-                    {
-                        Atom secondAtom = Atom.AllAtoms[j];
-                        float[] deltaR = Boundary.deltaPosition(firstAtom, secondAtom);
-                        float distance = (float)Math.Sqrt(deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2]);
-                        Potential.myPotential.calculateNeighborList(distance, firstAtom, secondAtom);
-                        PairDistributionFunction.updatePairDistribution(distance);
-                    }
-                }
-                PairDistributionFunction.calculateAveragePairDistribution();
-            }
-        }
 
         public static void CalculateEnergy()
         {

@@ -26,6 +26,7 @@ namespace StandAloneMD
                 PhysicsEngine.VelocityVerlet();
                 Boundary.Box();
                 PhysicsEngine.CalculateEnergy();
+                PairDistributionFunction.calculateAveragePairDistribution();
 
                 StaticVariables.currentTime = StaticVariables.currentTime + StaticVariables.MDTimestep;
                 StaticVariables.iTime++;
