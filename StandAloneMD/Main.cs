@@ -16,7 +16,7 @@ namespace StandAloneMD
             //CreateEnvironment.myEnvironment.InitAtomsDebug();
             Potential.myPotential.calculateVerletRadius();
 
-            Console.WriteLine("Number of atoms = " + CreateEnvironment.myEnvironment.numAtoms);
+            Console.WriteLine("Number of atoms = " + Atom.AllAtoms.Count);
 
             float totalTime = 20000.0f * StaticVariables.MDTimestep;
             Stopwatch stopwatch = new Stopwatch();
