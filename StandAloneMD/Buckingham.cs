@@ -8,7 +8,7 @@ namespace StandAloneMD
     class Buckingham : Potential
     {
         //Cutoff distance for calculating Buckingham force. Beyond this distance the force is taken to be zero.
-        private float cutoff = 10.0f; //[Angstrom]
+        private float cutoff = 14.90f; //[Angstrom]
         private float cutoffSqr;
 
         //Cutoff distance for using the spline interpolation function. Beyond this distance the force smoothed to zero.
@@ -171,7 +171,7 @@ namespace StandAloneMD
             float[] firstAtomAcceleration = new float[3];
             float[] secondAtomAcceleration = new float[3];
 
-            float[] deltaR = Boundary.deltaPosition(firstAtom,secondAtom);
+            float[] deltaR = BoundaryCondition.myBoundary.deltaPosition(firstAtom, secondAtom);
             float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
 
             //only get the forces of the atoms that are within the cutoff range
@@ -190,7 +190,7 @@ namespace StandAloneMD
         public override float getPotential(Atom firstAtom, Atom secondAtom)
         {
             float potential = 0.0f;
-            float[] deltaR = Boundary.deltaPosition(firstAtom,secondAtom);
+            float[] deltaR = BoundaryCondition.myBoundary.deltaPosition(firstAtom, secondAtom);
             float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
 
             //only get the forces of the atoms that are within the cutoff range
@@ -228,7 +228,7 @@ namespace StandAloneMD
                 for (int j = i + 1; j < Atom.AllAtoms.Count; j++)
                 {
                     Atom secondAtom = Atom.AllAtoms[j];
-                    float[] deltaR = Boundary.deltaPosition(firstAtom, secondAtom);
+                    float[] deltaR = BoundaryCondition.myBoundary.deltaPosition(firstAtom, secondAtom);
                     float distanceSqr = (deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2]);
                     if (distanceSqr < firstAtom.verletRadius * firstAtom.verletRadius)
                         firstAtom.neighborList.Add(secondAtom);

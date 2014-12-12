@@ -1,2 +1,3 @@
 C:\Amirhossein\StandAloneMD\StandAloneMD\bin\Release\StandAloneMD.exe
 C:\Amirhossein\StandAloneMD\StandAloneMD\obj\x86\Release\StandAloneMD.exe
+C:\Amirhossein\StandAloneMD\StandAloneMD\obj\x86\Release\StandAloneMD.csprojResolveAssemblyReference.cache

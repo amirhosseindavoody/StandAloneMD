@@ -122,7 +122,7 @@ namespace StandAloneMD
         //the function returns the Lennard-Jones force on the atom given the list of all the atoms in the simulation
         public override void getForce(Atom firstAtom, Atom secondAtom)
         {
-            float[] deltaR = Boundary.deltaPosition(firstAtom,secondAtom);
+            float[] deltaR = BoundaryCondition.myBoundary.deltaPosition(firstAtom, secondAtom);
             float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
             float finalSigma = sigmaValues[firstAtom.atomID, secondAtom.atomID];
             float normDistanceSqr = distanceSqr / finalSigma / finalSigma; // this is normalized distanceSqr to the sigmaValue
@@ -143,7 +143,7 @@ namespace StandAloneMD
         public override float getPotential(Atom firstAtom, Atom secondAtom)
         {
             float potential = 0.0f;
-            float[] deltaR = Boundary.deltaPosition(firstAtom,secondAtom);
+            float[] deltaR = BoundaryCondition.myBoundary.deltaPosition(firstAtom, secondAtom);
             float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
             float finalSigma = sigmaValues[firstAtom.atomID, secondAtom.atomID];
             float normDistanceSqr = distanceSqr / finalSigma / finalSigma; // this is normalized distanceSqr to the sigmaValue
@@ -183,7 +183,7 @@ namespace StandAloneMD
                 for (int j = i + 1; j < Atom.AllAtoms.Count; j++)
                 {
                     Atom secondAtom = Atom.AllAtoms[j];
-                    float[] deltaR = Boundary.deltaPosition(firstAtom, secondAtom);
+                    float[] deltaR = BoundaryCondition.myBoundary.deltaPosition(firstAtom, secondAtom);
                     float distanceSqr = (deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2]);
                     float finalSigma = sigmaValues[firstAtom.atomID, secondAtom.atomID];
                     float normDistanceSqr = distanceSqr / finalSigma / finalSigma; // this is normalized distanceSqr to the sigmaValue

@@ -21,7 +21,7 @@ namespace StandAloneMD
 {
 	public class CreateEnvironment
 	{
-		public int numAtoms = 100;
+		public int numAtoms = 1000;
 		public float width;
 		public float height;
 		public float depth;
@@ -151,7 +151,7 @@ namespace StandAloneMD
             {
                 float minDistance = 2.0f;
                 Atom otherAtom = Atom.AllAtoms[i];
-                float[] deltaR = Boundary.deltaPosition(currAtom, otherAtom);
+                float[] deltaR = BoundaryCondition.myBoundary.deltaPosition(currAtom, otherAtom);
                 float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
                 
                 if (distanceSqr < (minDistance * minDistance))

@@ -24,7 +24,7 @@ namespace StandAloneMD
             while (StaticVariables.currentTime < totalTime)
             {            
                 PhysicsEngine.VelocityVerlet();
-                Boundary.Box();
+                BoundaryCondition.myBoundary.Apply();
                 PhysicsEngine.CalculateEnergy();
                 PairDistributionFunction.calculateAveragePairDistribution();
 

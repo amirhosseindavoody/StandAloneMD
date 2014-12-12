@@ -5,7 +5,7 @@ clc;
 fig = 10;
 eV = 1.6e-19;
 numAtom = 2000;
-directory = 'C:\Amirhossein\StandAloneMD\StandAloneMD\bin\Release\';
+directory = 'C:\Amirhossein\StandAloneMD\Test Run\1000Atoms - 300 Kelvin - Buckingham 2\';
 %% Plot potential
 % filename = 'potential.txt';
 % myPotential = load ([directory filename]);
@@ -35,7 +35,7 @@ filename = 'pairDistribution.txt';
 pairDistribution = load ([directory filename]);
 
 fig=fig+1; figure(fig);
-plot(sqrt(8)*pairDistribution(:,1),'-b','LineWidth',3); hold on;
+plot(pairDistribution(:,1),'-b','LineWidth',3); hold on;
 axis tight;
 return;
 
