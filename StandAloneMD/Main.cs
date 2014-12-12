@@ -34,7 +34,7 @@ namespace StandAloneMD
             }
             
             stopwatch.Stop();
-            //myData.WritePairDistribution();
+            WriteData.WritePairDistribution();
             Console.WriteLine("iTime = " + StaticVariables.iTime + "            Current Time = " + StaticVariables.currentTime);
             Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
             Console.ReadLine();

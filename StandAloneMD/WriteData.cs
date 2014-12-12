@@ -38,7 +38,7 @@ namespace StandAloneMD
             }
         }
 
-        public void WritePairDistribution()
+        public static void WritePairDistribution()
         {
             StreamWriter pairDistributionFile;
             pairDistributionFile = new StreamWriter("pairDistribution.txt");

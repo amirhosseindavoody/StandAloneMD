@@ -8,7 +8,7 @@ namespace StandAloneMD
     class Boundary
     {
         //this varaible keeps track of the current potential that is being used. (Note: only Lennard-Jones is currently implemented)
-        public static boundaryType currentBoundary = boundaryType.Box;
+        private static boundaryType currentBoundary = boundaryType.Box;
 
         //Types of potential in the simulation
         public enum boundaryType
