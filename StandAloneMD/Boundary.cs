@@ -8,7 +8,7 @@ namespace StandAloneMD
     class Boundary
     {
         //this varaible keeps track of the current potential that is being used. (Note: only Lennard-Jones is currently implemented)
-        public static boundaryType currentBoundary = boundaryType.Periodic;
+        public static boundaryType currentBoundary = boundaryType.Box;
 
         //Types of potential in the simulation
         public enum boundaryType
@@ -69,9 +69,11 @@ namespace StandAloneMD
             for (int idx = 0; idx < 3; idx++)
             {
                 deltaR[idx] = firstAtom.position[idx] - secondAtom.position[idx];
-                float sign = (float)Math.Sign(deltaR[idx]);
-                if ((Math.Abs(deltaR[idx]) > (boxDimension[idx]/2.0f)) && (currentBoundary == boundaryType.Periodic))
+                if ((Math.Abs(deltaR[idx]) > (boxDimension[idx] / 2.0f)) && (currentBoundary == boundaryType.Periodic))
+                {
+                    float sign = (float)Math.Sign(deltaR[idx]);
                     deltaR[idx] = deltaR[idx] - sign * boxDimension[idx];
+                }
             }
             return deltaR;
         }

@@ -21,7 +21,7 @@ namespace StandAloneMD
 {
 	public class CreateEnvironment
 	{
-		public int numAtoms = 2000;
+		public int numAtoms = 100;
 		public float width;
 		public float height;
 		public float depth;
@@ -61,7 +61,7 @@ namespace StandAloneMD
         public void InitAtoms()
 		{
             //set the values for the initialization of atoms, this will later change to the real box size
-            width = 35.0f;
+            width = 30.0f;
             depth = width;
             height = width;
             volume = width * depth * height;
@@ -111,7 +111,7 @@ namespace StandAloneMD
             }
 
             //now, set the values for the real box size which will be used to reflect atoms from walls.
-            width = 35.0f;
+            width = 30.0f;
             depth = width;
             height = width;
             volume = width * depth * height;

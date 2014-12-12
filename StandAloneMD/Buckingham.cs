@@ -15,7 +15,7 @@ namespace StandAloneMD
         private float rSpline; //[Angstrom]
 
         //The mesh size for pre-calculating Lennard Jones force.
-        private float dR = 0.001f;
+        private float dR = 0.0001f;
 
         //pre-calculated coefficients and forces for Buckingham potential
         private float[, ,] preBuckinghamAcceleration;
@@ -69,8 +69,8 @@ namespace StandAloneMD
                     }
                 }
             }
-            WriteData.WritePotential(PreBuckinghamPotential);
-            WriteData.WriteForce(preBuckinghamAcceleration);
+            //WriteData.WritePotential(PreBuckinghamPotential);
+            //WriteData.WriteForce(preBuckinghamAcceleration);
         }
 
         //the function returns the LennarJones force on the atom given the list of the atoms that are within range of it

@@ -35,6 +35,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Boundary.cs" />
     <Compile Include="Buckingham.cs" />
     <Compile Include="PairDistributionFunction.cs" />
     <Compile Include="Potential.cs" />

@@ -18,6 +18,13 @@ namespace StandAloneMD
                 currAtom.accelerationNew = new float[3] { 0.0f, 0.0f, 0.0f };
 			}
 
+            /*
+            if (StaticVariables.iTime % StaticVariables.nVerlet == 0)
+            {
+                Potential.myPotential.calculateNeighborList(distance, firstAtom, secondAtom);
+            }
+             */
+
             updateNeighborList();
             
             // update the acceleration of all atoms
