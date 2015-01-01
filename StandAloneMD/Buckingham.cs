@@ -204,7 +204,7 @@ namespace StandAloneMD
 
         public override void calculateVerletRadius()
         {
-            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
+            for (int i = 0; i < Atom.AllAtoms.Count; i++)
             {
                 Atom currAtom = Atom.AllAtoms[i];
                 currAtom.verletRadius = cutoff + 1.0f;
@@ -215,7 +215,7 @@ namespace StandAloneMD
         public override void calculateNeighborList()
         {
             //clear the old neighborList
-            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
+            for (int i = 0; i < Atom.AllAtoms.Count; i++)
             {
                 Atom currAtom = Atom.AllAtoms[i];
                 currAtom.neighborList.Clear();
@@ -230,7 +230,7 @@ namespace StandAloneMD
                     Atom secondAtom = Atom.AllAtoms[j];
                     float[] deltaR = BoundaryCondition.myBoundary.deltaPosition(firstAtom, secondAtom);
                     float distanceSqr = (deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2]);
-                    if (distanceSqr < firstAtom.verletRadius * firstAtom.verletRadius)
+                    if (distanceSqr < (firstAtom.verletRadius * firstAtom.verletRadius))
                         firstAtom.neighborList.Add(secondAtom);
                 }
             }

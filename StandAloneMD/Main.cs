@@ -8,15 +8,16 @@ namespace StandAloneMD
 	{
 		public static void Main (string[] args)
 		{
-            //WriteData myData = new WriteData();
+            WriteData myData = new WriteData();
 
             CreateEnvironment.myEnvironment = new CreateEnvironment();
             CreateEnvironment.myEnvironment.PreCompute();
-            CreateEnvironment.myEnvironment.InitAtoms();
-            //CreateEnvironment.myEnvironment.InitAtomsDebug();
+            //CreateEnvironment.myEnvironment.InitAtoms();
+            CreateEnvironment.myEnvironment.InitAtomsDebug();
             Potential.myPotential.calculateVerletRadius();
 
             Console.WriteLine("Number of atoms = " + Atom.AllAtoms.Count);
+            Console.ReadLine();
 
             float totalTime = 20000.0f * StaticVariables.MDTimestep;
             Stopwatch stopwatch = new Stopwatch();
@@ -30,7 +31,7 @@ namespace StandAloneMD
 
                 StaticVariables.currentTime = StaticVariables.currentTime + StaticVariables.MDTimestep;
                 StaticVariables.iTime++;
-                //myData.WritePosition();
+                myData.WritePosition();
             }
             
             stopwatch.Stop();

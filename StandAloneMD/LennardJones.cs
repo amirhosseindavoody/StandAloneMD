@@ -159,7 +159,7 @@ namespace StandAloneMD
 
         public override void calculateVerletRadius()
         {
-            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
+            for (int i = 0; i < Atom.AllAtoms.Count; i++)
             {
                 Atom currAtom = Atom.AllAtoms[i];
                 currAtom.verletRadius = cutoff + 1.0f;
@@ -170,7 +170,7 @@ namespace StandAloneMD
         public override void calculateNeighborList()
         {
             //clear the old neighborList
-            for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
+            for (int i = 0; i < Atom.AllAtoms.Count; i++)
             {
                 Atom currAtom = Atom.AllAtoms[i];
                 currAtom.neighborList.Clear();

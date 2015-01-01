@@ -21,7 +21,7 @@ namespace StandAloneMD
 {
 	public class CreateEnvironment
 	{
-		public int numAtoms = 1000;
+		public int numAtoms = 2;
 		public float width;
 		public float height;
 		public float depth;
@@ -124,16 +124,18 @@ namespace StandAloneMD
         {
             Atom copperAtom = new Copper();
             copperAtom.velocity = new float[] { 0.0f, 0.0f, 0.0f };
-            copperAtom.position = new float[] { -1.5f, 0.0f, 0.0f };
+            copperAtom.position = new float[] { -2.0f, 0.0f, 0.0f };
 
             Atom goldAtom = new Gold();
             goldAtom.velocity = new float[] { 0.0f, 0.0f, 0.0f };
-            goldAtom.position = new float[] { +1.5f, 0.0f, 0.0f };
+            goldAtom.position = new float[] { +2.0f, 0.0f, 0.0f };
 
-            width = 10.0f;
+            width = 20.0f;
             depth = width;
             height = width;
             volume = width * depth * height;
+
+            myEnvironment.numAtoms = Atom.AllAtoms.Count;
         }
 
         //this method generates a random float number between the minValue and maxValue

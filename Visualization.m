@@ -1,11 +1,11 @@
 %%
-% close all;
+close all;
 clear all;
 clc;
 fig = 10;
 eV = 1.6e-19;
-numAtom = 2000;
-directory = 'C:\Amirhossein\StandAloneMD\Test Run\1000Atoms - 300 Kelvin - Buckingham 2\';
+numAtom = 2;
+directory = 'C:\Users\amirhossein\Documents\GitHub\StandAloneMD\StandAloneMD\bin\Release\';
 %% Plot potential
 % filename = 'potential.txt';
 % myPotential = load ([directory filename]);
@@ -37,17 +37,17 @@ pairDistribution = load ([directory filename]);
 fig=fig+1; figure(fig);
 plot(pairDistribution(:,1),'-b','LineWidth',3); hold on;
 axis tight;
-return;
+% return;
 
 %% Plot energy
-% filename = 'energy.txt';
-% energy = load ([directory filename]);
-% 
-% fig=fig+1; figure(fig);
-% plot(energy(:,1)/eV,'-b','LineWidth',3); hold on;
-% plot(energy(:,2)/eV,'-r','LineWidth',3);
-% plot((energy(:,1)+energy(:,2))/eV,'-k','LineWidth',3);
-% axis tight;
+filename = 'energy.txt';
+energy = load ([directory filename]);
+
+fig=fig+1; figure(fig);
+plot(energy(:,1)/eV,'-b','LineWidth',3); hold on;
+plot(energy(:,2)/eV,'-r','LineWidth',3);
+plot((energy(:,1)+energy(:,2))/eV,'-k','LineWidth',3);
+axis tight;
 % return;
 
 %% Plot temperature
@@ -64,12 +64,12 @@ filename = 'position.txt';
 position = load ([directory filename]);
 nTime = size(position,1)/numAtom;
 
-Max = +20;
-Min = -20;
+Max = +10;
+Min = -10;
 
 fig = fig+1; figure(fig);
-% for iT = 1 :20: nTime
-for iT = nTime
+for iT = 1 :5: nTime
+% for iT = nTime
     iT
     for iAtom = 1:numAtom
         plot3(position((iT-1)*numAtom+iAtom,1),position((iT-1)*numAtom+iAtom,2),position((iT-1)*numAtom+iAtom,3),'b*'); hold on;
@@ -80,6 +80,6 @@ for iT = nTime
     box on;
     view([0 90]);
     hold off;
-    pause (0.1);
-%     pause;
+%     pause (0.1);
+    pause;
 end;
