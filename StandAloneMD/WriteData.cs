@@ -8,40 +8,40 @@ namespace StandAloneMD
 {
     class WriteData
     {
-        int writeFlag;
-        StreamWriter positionFile;
-        StreamWriter energyFile;
-        StreamWriter temperatureFile;
+        private static int writeFlag;
+        private static StreamWriter positionFile;
+        private static StreamWriter energyFile;
+        private static StreamWriter temperatureFile;
+        private static StreamWriter pairDistributionFile;
 
-        public WriteData()
+        public static void OpenFiles()
         {
             positionFile = new StreamWriter("position.txt");
             energyFile = new StreamWriter("energy.txt");
             temperatureFile = new StreamWriter("temperature.txt");
+            pairDistributionFile = new StreamWriter("pairDistribution.txt");
 
             writeFlag = 01;
         }
 
-        public void WritePosition()
+        public static void WritePosition()
         {
             writeFlag--;
             if (writeFlag == 0)
             {
                 Console.WriteLine("iTime = " + StaticVariables.iTime);
-                for (int i = 0; i < Atom.AllAtoms.Count; i++)
-                {
-                    positionFile.WriteLine(Atom.AllAtoms[i].position[0] + "    " + Atom.AllAtoms[i].position[1] + "    " + Atom.AllAtoms[i].position[2]);
-                    energyFile.WriteLine(StaticVariables.potentialEnergy + "    " + StaticVariables.kineticEnergy);
-                    temperatureFile.WriteLine(StaticVariables.currentTemperature);
-                }
+                energyFile.WriteLine(StaticVariables.potentialEnergy + "    " + StaticVariables.kineticEnergy);
+                //temperatureFile.WriteLine(StaticVariables.currentTemperature);
+                //for (int i = 0; i < Atom.AllAtoms.Count; i++)
+                //{
+                    //positionFile.WriteLine(Atom.AllAtoms[i].position[0] + "    " + Atom.AllAtoms[i].position[1] + "    " + Atom.AllAtoms[i].position[2]);
+                //}
                 writeFlag = 20;
             }
         }
 
         public static void WritePairDistribution()
-        {
-            StreamWriter pairDistributionFile;
-            pairDistributionFile = new StreamWriter("pairDistribution.txt");
+        {   
             for (int i = 0; i < PairDistributionFunction.PairDistributionAverage.Length; i++)
             {
                 pairDistributionFile.WriteLine(PairDistributionFunction.PairDistributionAverage[i]);
@@ -72,6 +72,14 @@ namespace StandAloneMD
             {
                 forceFile.WriteLine(myForce[0, 0, iR] + "     " + myForce[0, 1, iR] + "     " + myForce[1, 0, iR] + "     " + myForce[1, 1, iR]);
             }
+        }
+
+        public static void CloseFiles()
+        {
+            positionFile.Close();
+            energyFile.Close();
+            temperatureFile.Close();
+            pairDistributionFile.Close();
         }
     }
 }

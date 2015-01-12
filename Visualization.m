@@ -1,8 +1,8 @@
 %%
-close all;
+% close all;
 clear all;
 clc;
-fig = 10;
+fig = 30;
 eV = 1.6e-19;
 numAtom = 2;
 directory = 'C:\Users\amirhossein\Documents\GitHub\StandAloneMD\StandAloneMD\bin\Release\';
@@ -33,9 +33,11 @@ directory = 'C:\Users\amirhossein\Documents\GitHub\StandAloneMD\StandAloneMD\bin
 %% Plot pair distribution
 filename = 'pairDistribution.txt';
 pairDistribution = load ([directory filename]);
+dR=0.1;
+r = linspace(dR,length(pairDistribution)*dR,length(pairDistribution));
 
 fig=fig+1; figure(fig);
-plot(pairDistribution(:,1),'-b','LineWidth',3); hold on;
+plot(r,pairDistribution(:,1),'-b','LineWidth',3); hold on;
 axis tight;
 % return;
 
@@ -44,11 +46,11 @@ filename = 'energy.txt';
 energy = load ([directory filename]);
 
 fig=fig+1; figure(fig);
-plot(energy(:,1)/eV,'-b','LineWidth',3); hold on;
-plot(energy(:,2)/eV,'-r','LineWidth',3);
-plot((energy(:,1)+energy(:,2))/eV,'-k','LineWidth',3);
+plot(energy(:,1)/eV,'-b','LineWidth',5); hold on;
+plot(energy(:,2)/eV,'-r','LineWidth',5);
+plot((energy(:,1)+energy(:,2))/eV,'-k','LineWidth',5);
 axis tight;
-% return;
+return;
 
 %% Plot temperature
 % filename = 'temperature.txt';

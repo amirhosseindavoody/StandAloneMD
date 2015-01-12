@@ -39,7 +39,8 @@ namespace StandAloneMD
 	
 	    public override float massamu
 		{
-			get { return 63.546f; } //amu
+			//get { return 63.546f; } //amu
+            get { return 22.98977f; } //amu for Sodium
 		}
 
 		// We assume copper to play the role of sodium

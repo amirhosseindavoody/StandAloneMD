@@ -8,7 +8,7 @@ namespace StandAloneMD
     class Buckingham : Potential
     {
         //Cutoff distance for calculating Buckingham force. Beyond this distance the force is taken to be zero.
-        private float cutoff = 14.90f; //[Angstrom]
+        private float cutoff = 100.0f; //[Angstrom]
         private float cutoffSqr;
 
         //Cutoff distance for using the spline interpolation function. Beyond this distance the force smoothed to zero.
@@ -62,8 +62,8 @@ namespace StandAloneMD
                     for (int iR = 0; iR < nR; iR++)
                     {
                         float distance = (float)iR * dR;
-                        if (distance < 0.5f)
-                            distance = 0.5f;
+                        if (distance < 1.455f)
+                            distance = 1.455f;
                         preBuckinghamAcceleration[firstAtom.atomID,secondAtom.atomID,iR] = calcAcceleration(distance,firstAtom,secondAtom);
                         PreBuckinghamPotential[firstAtom.atomID, secondAtom.atomID, iR] = calcPotential(distance, firstAtom, secondAtom);
                     }

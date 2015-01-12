@@ -9,7 +9,7 @@ namespace StandAloneMD
     {
         //The mesh size for pair distribution function.
         private static float dR = 0.1f; //[Angstrom]
-        private static float maxR = 60.0f; //[Angstrom]
+        private static float maxR = 15.0f; //[Angstrom]
         private static float[] pairDistribution = new float[(int)(maxR / dR)];
         private static float[] pairDistributionAverage = new float[(int)(maxR / dR)];
         private static float numberOfCalculations = 0.0f;
@@ -25,7 +25,7 @@ namespace StandAloneMD
 
         public static void calculateAveragePairDistribution()
         {
-            if (StaticVariables.iTime % StaticVariables.nVerlet == 0)
+            if ((StaticVariables.iTime % StaticVariables.nVerlet == 0) && (StaticVariables.iTime > 10000))
             {
                 normCoefficient = CreateEnvironment.myEnvironment.volume / ((float)Atom.AllAtoms.Count * (float)Atom.AllAtoms.Count * 4.0f * (float)Math.PI * dR * dR * dR);
                 updatePairDistribution();
@@ -62,7 +62,8 @@ namespace StandAloneMD
                     float[] deltaR = BoundaryCondition.myBoundary.deltaPosition(firstAtom, secondAtom);
                     float distance = (float)Math.Sqrt(deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2]);
                     int iR = (int)Math.Floor(distance / dR);
-                    pairDistribution[iR] += 2.0f;
+                    if (iR < pairDistribution.Length)
+                        pairDistribution[iR] += 2.0f;
                 }
             }
         }

@@ -39,7 +39,8 @@ namespace StandAloneMD
 	
 		public override float massamu 
 		{
-			get { return 196.967f; } //amu
+			//get { return 196.967f; } //amu
+            get { return 35.453f; } //amu for Chlorine
 		}
 
 		// We assume gold to play the role of chloride

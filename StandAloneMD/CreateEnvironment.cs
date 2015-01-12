@@ -21,7 +21,7 @@ namespace StandAloneMD
 {
 	public class CreateEnvironment
 	{
-		public int numAtoms = 2;
+		public int numAtoms = 100;
 		public float width;
 		public float height;
 		public float depth;
@@ -61,7 +61,7 @@ namespace StandAloneMD
         public void InitAtoms()
 		{
             //set the values for the initialization of atoms, this will later change to the real box size
-            width = 30.0f;
+            width = 15.0f;
             depth = width;
             height = width;
             volume = width * depth * height;
@@ -111,7 +111,7 @@ namespace StandAloneMD
             }
 
             //now, set the values for the real box size which will be used to reflect atoms from walls.
-            width = 30.0f;
+            width = 15.0f;
             depth = width;
             height = width;
             volume = width * depth * height;
@@ -151,7 +151,7 @@ namespace StandAloneMD
             bool proximityFlag = true;
             for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
             {
-                float minDistance = 2.0f;
+                float minDistance = 2.35f;
                 Atom otherAtom = Atom.AllAtoms[i];
                 float[] deltaR = BoundaryCondition.myBoundary.deltaPosition(currAtom, otherAtom);
                 float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];
