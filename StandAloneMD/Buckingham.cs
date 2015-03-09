@@ -15,16 +15,16 @@ namespace StandAloneMD
         private float rSpline; //[Angstrom]
 
         //The mesh size for pre-calculating Lennard Jones force.
-        private float dR = 0.0001f;
+        private float dR = 0.001f;
 
         //pre-calculated coefficients and forces for Buckingham potential
         private float[, ,] preBuckinghamAcceleration;
         private float[, ,] PreBuckinghamPotential;
 
-        private float[,] coeff_A = new float[3, 3];
-        private float[,] coeff_B = new float[3, 3];
-        private float[,] coeff_C = new float[3, 3];
-        private float[,] coeff_D = new float[3, 3];
+        private float[,] coeff_A = new float[Atom.templateAtoms.Count, Atom.templateAtoms.Count];
+        private float[,] coeff_B = new float[Atom.templateAtoms.Count, Atom.templateAtoms.Count];
+        private float[,] coeff_C = new float[Atom.templateAtoms.Count, Atom.templateAtoms.Count];
+        private float[,] coeff_D = new float[Atom.templateAtoms.Count, Atom.templateAtoms.Count];
 
         public Buckingham()
         {
@@ -36,9 +36,9 @@ namespace StandAloneMD
         {
             // precalculate the LennardJones potential and store it in preLennarJones array.
             int nR = (int)(cutoff / dR) + 1;
-            preBuckinghamAcceleration = new float[3,3,nR];
-            PreBuckinghamPotential = new float[3,3,nR];
-
+            preBuckinghamAcceleration = new float[Atom.templateAtoms.Count, Atom.templateAtoms.Count, nR];
+            PreBuckinghamPotential = new float[Atom.templateAtoms.Count, Atom.templateAtoms.Count, nR];
+            /*
             //precompute sigma and acceleration coefficient for the Buckingham potential
             for (int i = 0; i < Atom.templateAtoms.Count; i++)
             {
@@ -69,8 +69,14 @@ namespace StandAloneMD
                     }
                 }
             }
-            //WriteData.WritePotential(PreBuckinghamPotential);
-            //WriteData.WriteForce(preBuckinghamAcceleration);
+            InputOutput.WritePotential(PreBuckinghamPotential);
+            InputOutput.WriteForce(preBuckinghamAcceleration);
+             */
+
+            InputOutput.ReadPotential(PreBuckinghamPotential);
+            InputOutput.ReadForce(preBuckinghamAcceleration);
+
+            Console.WriteLine("Potential and Forces saved!");
         }
 
         //the function returns the LennarJones force on the atom given the list of the atoms that are within range of it

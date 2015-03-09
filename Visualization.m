@@ -5,7 +5,7 @@ clc;
 fig = 30;
 eV = 1.6e-19;
 numAtom = 2;
-directory = 'C:\Users\amirhossein\Documents\GitHub\StandAloneMD\StandAloneMD\bin\Release\';
+directory = 'C:\Amirhossein\StandAloneMD\StandAloneMD\bin\Release\';
 %% Plot potential
 % filename = 'potential.txt';
 % myPotential = load ([directory filename]);

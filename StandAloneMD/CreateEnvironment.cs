@@ -35,6 +35,8 @@ namespace StandAloneMD
             Atom.templateAtoms.Add(new Copper());
             Atom.templateAtoms.Add(new Gold());
             Atom.templateAtoms.Add(new Platinum());
+            Atom.templateAtoms.Add(new Sodium());
+            Atom.templateAtoms.Add(new Chlorine());
 
             // delete the template atoms from the list of m_AllAtoms in Atom.cs
             for (int i = 0; i < Atom.templateAtoms.Count; i++)
@@ -86,7 +88,7 @@ namespace StandAloneMD
             {
                 for (int i = 0; i < numAtoms/2; i++)
                 {
-                    Atom currAtom = new Copper();
+                    Atom currAtom = new Sodium();
                     bool proximityFlag = false;
 
                     while (proximityFlag == false)
@@ -98,7 +100,7 @@ namespace StandAloneMD
                 }
                 for (int i = numAtoms/2; i < numAtoms; i++)
                 {
-                    Atom currAtom = new Gold();
+                    Atom currAtom = new Chlorine();
                     bool proximityFlag = false;
 
                     while (proximityFlag == false)

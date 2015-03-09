@@ -22,8 +22,8 @@ namespace StandAloneMD
         private float rMinMultiplier = 0.75f;
 
         //pre-calculated coefficients and forces for Lennard-Jones potential
-        private float[,] sigmaValues = new float[3, 3];
-        private float[,] accelCoefficient = new float[3, 3]; // this is the coefficient that is multiplied by the preLennardJones vector to get the acceleration of each atom for each combinations
+        private float[,] sigmaValues = new float[Atom.templateAtoms.Count, Atom.templateAtoms.Count];
+        private float[,] accelCoefficient = new float[Atom.templateAtoms.Count, Atom.templateAtoms.Count]; // this is the coefficient that is multiplied by the preLennardJones vector to get the acceleration of each atom for each combinations
         private float[] preLennardJonesForce; //This is the pre-calculated value of LennardJones force for some mesh points.
         private float[] preLennardJonesPotential; //This is the pre-calculated value of LennardJones potential for some mesh points.
 

@@ -41,7 +41,6 @@ namespace StandAloneMD
 			get { return 195.084f; } //amu
 		}
 
-		// These are just dummy variables for platinum
 		public override float buck_A 
 		{
 			get { return 0.0f; } //units of [J]

@@ -39,34 +39,32 @@ namespace StandAloneMD
 	
 		public override float massamu 
 		{
-			//get { return 196.967f; } //amu
-            get { return 35.453f; } //amu for Chlorine
+			get { return 196.967f; } //amu for Gold
 		}
 
-		// We assume gold to play the role of chloride
 		public override float buck_A 
 		{
-			get { return 405774.0f*1.6f* (float)Math.Pow(10,-19); } //units of [J]
+			get { return 0.0f; } //units of [J]
 		}
 	
 		public override float buck_B 
 		{
-			get { return 4.207408f; } //units of [1/Angstrom]
+			get { return 0.0f; } //units of [1/Angstrom]
 		}
 	
 		public override float buck_C 
 		{
-			get { return 72.4f*1.6f* (float)Math.Pow(10,-19); } //units of [J.Anstrom^6]
+			get { return 0.0f; } //units of [J.Anstrom^6]
 		}
 	
 		public override float buck_D 
 		{
-			get { return 145.425f*1.6f* (float)Math.Pow(10,-19); } //units of [J.Angstrom^8]
+			get { return 0.0f; } //units of [J.Angstrom^8]
 		}
 	
 		public override float Q_eff 
 		{
-			get { return -1.0f*1.6f* (float)Math.Pow(10,-19); } //units of Coulomb
+			get { return 0.0f; } //units of Coulomb
 		}
 	}
 }

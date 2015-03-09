@@ -8,7 +8,8 @@ namespace StandAloneMD
 	{
 		public static void Main (string[] args)
 		{
-            WriteData.OpenFiles();
+
+            InputOutput.OpenFiles();
 
             CreateEnvironment.myEnvironment = new CreateEnvironment();
             CreateEnvironment.myEnvironment.PreCompute();
@@ -31,12 +32,12 @@ namespace StandAloneMD
 
                 StaticVariables.currentTime = StaticVariables.currentTime + StaticVariables.MDTimestep;
                 StaticVariables.iTime++;
-                WriteData.WritePosition();
+                InputOutput.WritePosition();
             }
             
             stopwatch.Stop();
-            WriteData.WritePairDistribution();
-            WriteData.CloseFiles();
+            InputOutput.WritePairDistribution();
+            InputOutput.CloseFiles();
             Console.WriteLine("iTime = " + StaticVariables.iTime + "            Current Time = " + StaticVariables.currentTime);
             Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
             Console.ReadLine();

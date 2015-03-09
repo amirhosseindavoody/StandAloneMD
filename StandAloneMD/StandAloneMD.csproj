@@ -37,11 +37,13 @@
   <ItemGroup>
     <Compile Include="BoundaryCondition.cs" />
     <Compile Include="Buckingham.cs" />
+    <Compile Include="Chlorine.cs" />
     <Compile Include="PeriodicBoundary.cs" />
     <Compile Include="PairDistributionFunction.cs" />
     <Compile Include="Potential.cs" />
     <Compile Include="ReflectingBoundary.cs" />
-    <Compile Include="WriteData.cs" />
+    <Compile Include="Sodium.cs" />
+    <Compile Include="InputOutput.cs" />
     <Compile Include="LennardJones.cs" />
     <Compile Include="Matrix.cs" />
     <Compile Include="Copper.cs" />
