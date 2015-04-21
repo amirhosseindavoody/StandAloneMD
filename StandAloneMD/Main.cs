@@ -8,7 +8,7 @@ namespace StandAloneMD
 	{
 		public static void Main (string[] args)
 		{
-
+            Console.ReadLine();
             InputOutput.OpenFiles();
 
             CreateEnvironment.myEnvironment = new CreateEnvironment();
