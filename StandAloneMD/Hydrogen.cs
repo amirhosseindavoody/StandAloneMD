@@ -39,7 +39,7 @@ namespace StandAloneMD
 	
 	    public override float massamu
 		{
-            get { return 1.007f; } //amu for Copper
+            get { return 1.0f; } //amu for Hydrogen
 		}
 
 		public override float buck_A 

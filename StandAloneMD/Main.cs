@@ -8,6 +8,13 @@ namespace StandAloneMD
 	{
 		public static void Main (string[] args)
 		{
+            Console.WriteLine("Testing REBO potential!!!");
+            Potential.myPotential = new REBO();
+
+            Console.WriteLine("Reached end of REBO potential!!!");
+            Console.WriteLine("********************STOP THE PROGRAM NOW*********************");
+            Console.ReadLine();
+
             Console.ReadLine();
             InputOutput.OpenFiles();
 

@@ -37,7 +37,9 @@
   <ItemGroup>
     <Compile Include="BoundaryCondition.cs" />
     <Compile Include="Buckingham.cs" />
+    <Compile Include="Carbon.cs" />
     <Compile Include="Chlorine.cs" />
+    <Compile Include="Hydrogen.cs" />
     <Compile Include="MathConst.cs" />
     <Compile Include="PeriodicBoundary.cs" />
     <Compile Include="PairDistributionFunction.cs" />
