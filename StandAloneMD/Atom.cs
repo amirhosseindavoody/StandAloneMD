@@ -33,6 +33,7 @@ namespace StandAloneMD
 		public abstract float massamu{ get; } //amu
 		public abstract String atomName { get; }
 		public abstract int atomID { get;}
+		public abstract int atomicNumber { get; }
 
 		public abstract float buck_A { get; } // Buckingham potential coefficient
 		public abstract float buck_B { get; } // Buckingham potential coefficient

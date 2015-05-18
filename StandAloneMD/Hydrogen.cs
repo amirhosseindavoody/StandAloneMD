@@ -26,6 +26,11 @@ namespace StandAloneMD
 		{
 			get{ return 5;}
 		}
+
+		public override int atomicNumber
+		{
+			get { return 1; }
+		}
 	
 		public override float epsilon
 		{
