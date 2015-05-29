@@ -8,13 +8,14 @@ namespace StandAloneMD
     public abstract class Potential
     {
         //this varaible keeps track of the current potential that is being used. (Note: only Lennard-Jones is currently implemented)
-        public static potentialType currentPotential = potentialType.Buckingham;
+        public static potentialType currentPotential = potentialType.REBO;
 
         //Types of potential in the simulation
         public enum potentialType
         {
             LennardJones,
-            Buckingham
+            Buckingham,
+			REBO
         };
 
         public static Potential myPotential;

@@ -17,7 +17,7 @@ namespace StandAloneMD
 		private int[] LCHECK;
         private int[,] IN2, IN3;
 		private double RLL = 0.5; // this is most probably the shell thickness used for neighbor list calculation
-        private double SIGMA, EPSI, XQ, ATT, XQM, PQ, PIDT, XXDB;
+        private double SIGMA, EPSI, ATT, XQM, PQ, PIDT, XXDB;
 		private double tote; // total potential energy
 		private double[] XN1, XTN2, XTN1, ADB, CDB, CDB2, DDB, DDB2, HDB;
 		private double[] eatom;
@@ -43,27 +43,27 @@ namespace StandAloneMD
             
         }
 
-        //the function returns the LennarJones force on the atom given the list of the atoms that are within range of it
+        //the function returns the force on the atom given the list of the atoms that are within range of it
         private float calcAcceleration(float distance, Atom firstAtom, Atom secondAtom)
         {
             
             return 0.0f;
         }
 
-        //the function returns the LennarJones force on the atom given the list of the atoms that are within range of it
+        //the function returns the force on the atom given the list of the atoms that are within range of it
         private float calcPotential(float distance, Atom firstAtom, Atom secondAtom)
         {
             
             return 0.0f;
         }
 
-        //the function returns the Lennard-Jones force on the atom given the list of all the atoms in the simulation
+        //the function returns the force on the atom given the list of all the atoms in the simulation
         public override void getForce(Atom firstAtom, Atom secondAtom)
         {
             
         }
 
-        //the function returns the Lennard-Jones force on the atom given the list of all the atoms in the simulation
+        //the function returns the force on the atom given the list of all the atoms in the simulation
         public override float getPotential(Atom firstAtom, Atom secondAtom)
         {
 			tote = 0.0;
@@ -935,7 +935,7 @@ namespace StandAloneMD
 
 		}
 
-		private void pibond()
+		private void pibond() // This function calculates the forces due to pi-bonds between atoms
 		{
 			double[,] XHC = new double[Atom.AllAtoms.Count,2];
 

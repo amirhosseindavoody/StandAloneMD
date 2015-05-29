@@ -45,7 +45,7 @@ namespace StandAloneMD
         public List<Atom> neighborList = new List<Atom>();
 
 		public float[] velocity = new float[3]{0.0f, 0.0f, 0.0f};
-		public float[] position = new float[3]{0.0f, 0.0f, 0.0f};
+		public float[] position = new float[3]{0.0f, 0.0f, 0.0f}; //[Angstrom]
 		public float[] accelerationNew = new float[3] {0.0f, 0.0f, 0.0f};
         public float[] accelerationOld = new float[3] { 0.0f, 0.0f, 0.0f };
 

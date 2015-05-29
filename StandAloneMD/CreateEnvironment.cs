@@ -37,6 +37,8 @@ namespace StandAloneMD
             Atom.templateAtoms.Add(new Platinum());
             Atom.templateAtoms.Add(new Sodium());
             Atom.templateAtoms.Add(new Chlorine());
+			Atom.templateAtoms.Add(new Hydrogen());
+			Atom.templateAtoms.Add(new Carbon());
 
             // delete the template atoms from the list of m_AllAtoms in Atom.cs
             for (int i = 0; i < Atom.templateAtoms.Count; i++)
@@ -52,6 +54,9 @@ namespace StandAloneMD
                 case Potential.potentialType.Buckingham:
                     Potential.myPotential = new Buckingham();
                     break;
+				case Potential.potentialType.REBO:
+					Potential.myPotential = new REBO();
+					break;
             }
 
             Potential.myPotential.preCompute();
@@ -111,6 +116,33 @@ namespace StandAloneMD
                     }
                 }
             }
+			else if ((Potential.currentPotential == Potential.potentialType.REBO))
+			{
+				for (int i = 0; i < numAtoms / 2; i++)
+				{
+					Atom currAtom = new Hydrogen();
+					bool proximityFlag = false;
+
+					while (proximityFlag == false)
+					{
+						currAtom.velocity = new float[] { 0.0f, 0.0f, 0.0f };
+						currAtom.position = new float[] { randomFloat(-depth / 2.0f, depth / 2.0f), randomFloat(-width / 2.0f, width / 2.0f), randomFloat(-height / 2.0f, height / 2.0f) };
+						proximityFlag = checkProximity(currAtom);
+					}
+				}
+				for (int i = numAtoms / 2; i < numAtoms; i++)
+				{
+					Atom currAtom = new Carbon();
+					bool proximityFlag = false;
+
+					while (proximityFlag == false)
+					{
+						currAtom.velocity = new float[] { 0.0f, 0.0f, 0.0f };
+						currAtom.position = new float[] { randomFloat(-depth / 2.0f, depth / 2.0f), randomFloat(-width / 2.0f, width / 2.0f), randomFloat(-height / 2.0f, height / 2.0f) };
+						proximityFlag = checkProximity(currAtom);
+					}
+				}
+			}
 
             //now, set the values for the real box size which will be used to reflect atoms from walls.
             width = 15.0f;

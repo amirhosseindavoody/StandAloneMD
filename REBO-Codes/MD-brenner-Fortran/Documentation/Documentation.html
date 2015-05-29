@@ -1,0 +1,551 @@
+
+<!-- saved from url=(0064)http://www.eng.fsu.edu/~dommelen/research/nano/brenner/docs.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Documentation</title>
+<style type="text/css"></style></head>
+<body>
+
+<h2>Documentation</h2>
+
+<p>This file provides general information about the workings of the
+code, for those who want to make modifications.  No guarantee that any
+of this is correct; it was compiled while reading through the program
+to understand what it is doing, not to check the program.  Also, some
+of it was based on an abbreviated 1985 version of the program and may
+not apply to the full 1986 version.
+
+</p><h3>General notes</h3>
+
+<p>The code uses Angstrom, picoseconds, atomic mass, and electron volt
+units.  So it is frequently converting between eV and
+AMU A<sup>2</sup>/ps<sup>2</sup>.  See ECONV in the variable
+name table.
+
+</p><p>Real*8 numerical precision is needed, or bcuint has notable
+round-off error.  The same is almost certainly true for the other
+spline interpolation subroutines.
+
+</p><p>For the ideas behind the code, see Phys. Rev. B, Vol 42, pp
+9458-9471 for formulae and their symbols.  Also note, however
+
+</p><ul>
+
+<li>The values found for AD, AXL, ... for V<sub>A</sub> in param.f are
+grossly incompatible with those in Brenner's paper.
+
+</li><li>Moreover, it appears that the potential V<sub>A</sub> for CC in
+the program is made up of *three* of the exponential expressions as
+listed in the paper, (AD, AXL/ BD, BXL / CD, CXL), with expression A
+dominating for small r, being overtaken by C at 1.8, and B similar to
+C.
+
+</li><li>The repulsive potential seems to have an additional factor (1 +
+const/r), presumably to strongly prohibit atoms penetrating to the
+center of another atom.  The const is small, about 0.3.
+
+</li><li>N<sub>i</sub><sup>(C)</sup>, N<sub>i</sub><sup>(H)</sup>,
+N<sub>i</sub><sup>(t)</sup> are really N<sub>ij</sub> values since j
+is excluded in the sums.
+
+</li><li>G<sub>i</sub> for carbon has been made dependent on
+N<sub>i</sub><sup>(t)</sup>: the program switches smoothly to a
+different representation for G<sub>i</sub> between 4.2 and 4.7
+neighbors to the i-atom (including j), i.e. it switches in the range
+3.2 &lt; N<sub>i</sub><sup>(t)</sup> &lt; 3.7
+
+</li><li>&#948;<sub>ij</sub> has been hardcoded in pibond to be 0.5 for CC,
+CH, HC, HH
+
+</li><li>The program seems to square the sums in N<sub>ij</sub><sup>conj</sup>
+
+</li><li>The program includes a "torsional interaction" for CC bonds.  The
+added torsional potential is:
+<br>&nbsp;&nbsp;&nbsp;
+V<sup>tor</sup> =
+V<sub>A</sub>(|r<sub>ij</sub>|)
+A<sub>ij</sub>(N<sub>i</sub><sup>(t)</sup>,N<sub>j</sub><sup>(t)</sup>,N<sub>ij</sub><sup>conj</sup>)
+ &#931;<sub>kl</sub> sin<sup>2</sup>(&#966;<sub>ijkl</sub>) f<sub>ik</sub>
+f<sub>jl</sub>
+<br>
+where &#966;<sub>ijkl</sub> is the angle between the ijk
+and the ijl planes, and the sum extends over k&#8800;ij, l&#8800;ij,
+|sin(&#952;<sub>ijk</sub>)| &gt; 0.1, and |sin(&#952;<sub>jil</sub>)| &gt;
+0.1.  The f-values are hardcoded to special values for H.
+
+</li><li>The conditions on the sines in V<sup>tor</sup> imply that energy
+is NOT conserved when three atoms become almost along the same line.
+So, if there is a problem with energy conservation, try turning of the
+torsional potential by setting ndihed to 10 in
+Subroutines/Bond<sub>Order</sub>/param.f.
+
+</li><li>Alternatively, the subroutine has been modified to allow the
+restrictions to be smoothed.  Setting SINHI to 0.2 and SINLO to 0.0
+smooths the cut-off at 0.1 over that range and energy should again be
+conserved:
+<br>&nbsp;&nbsp;&nbsp;
+V<sup>tor</sup> = V<sub>A</sub>(|r<sub>ij</sub>|)
+ A<sub>ij</sub>(N<sub>i</sub><sup>(t)</sup>,N<sub>j</sub><sup>(t)</sup>,N<sub>ij</sub><sup>conj</sup>)
+ &#931;<sub>kl</sub> sin<sup>2</sup>(&#966;<sub>ijkl</sub>) f<sub>ik</sub>
+ f<sub>jl</sub> Z<sub>ijk</sub> Z<sub>jil</sub>
+<br>
+where in the smoothing range
+<br>&nbsp;&nbsp;&nbsp;
+Z<sub>ijk</sub> = 1 + cos(&#960; (sin(&#952;<sub>ijk</sub>)-SINHI)/(SINHI-SINLO))
+<br>&nbsp;&nbsp;&nbsp;
+Z<sub>jil</sub> = 1 + cos(&#960; (sin(&#952;<sub>jil</sub>)-SINHI)/(SINHI-SINLO))
+
+</li><li>The program includes a Lennard-Jones potential:
+V<sub>LJ</sub>=
+4 &#949;<sub>ij</sub> [(&#963;<sub>ij</sub>/r<sub>ij</sub>)<sup>12</sup>-
+(&#963;<sub>ij</sub>/r<sub>ij</sub>)<sup>6</sup>]<br>
+where &#949; is read in in K (corresponding to energy k K).<br>
+Interactions between two different type atoms use a geometrically
+average of the &#949; values of each atom and a straigth average &#963;.<br>
+<br>
+The Lennard-Jones potential is set to zero for
+r<sub>ij</sub> &gt; 2.5 &#963;<sub>ij</sub> and in the range
+r<sub>ij</sub> &lt; R<sub>ij</sub><sup>(2)</sup> in which the bond order
+potential is nonzero.
+In the range R<sub>ij</sub><sup>(2)</sup> &lt; r<sub>ij</sub>
+&lt; 0.95 &#963;<sub>ij</sub>;, the potential
+is furthermore replaced by a cubic which vanishes quadratically at
+R<sub>ij</sub><sup>(2)</sup> and which meets the Lennard-Jones expression
+with continuous first derivative at 0.95 &#963;<sub>ij</sub>.<br>
+<br>
+The discontinuity at 2.5 &#963;<sub>ij</sub> means that energy is
+<em>not</em> preserved.  I put in a variable ISMTH which can be changed
+to a nonzero value to substract the potential value at the cut-off, thus
+making the potential continuous.  Note however that this changes the
+forces in the range described by the cubic.
+
+</li></ul>
+
+<h3>Common blocks</h3>
+
+<p>The program uses common blocks for most variables which are
+loaded into each subroutine through common_files.inc:
+
+</p><ul>
+<li>common_ch.inc: hydrocarbon potential common blocks
+</li><li>common_lj_new.inc: Lennard-Jones common blocks
+</li><li>common_tb.inc: tight binding
+</li><li>common_md.inc: general
+</li><li>common_leon.inc: added by me
+</li></ul>
+
+<h3>I/O units</h3>
+
+<p>The following Fortran I/O units are in use by the code:
+
+</p><ul>
+<li> 1: xmol.d (to be post converted to xmol.xyz)
+</li><li> 9: output.d
+</li><li>11: coord.d
+</li><li>13: input.d
+</li><li>14-18: REBO potential splines
+</li><li>23: for bombard.f
+</li><li>41: (used in the periodic box straining modification)
+</li><li>50: overwrite.d
+</li><li>51: load.d
+</li><li>53: fort.53 debug file
+</li><li>55: max_ke.d
+</li><li>85: pair_energy.d eigenvectors.d
+</li><li>86: eigen_energies.d
+</li><li>87: dos.d
+</li><li>88: ldos.d
+</li></ul>
+
+<p>I moved pair_energy.d to I/O unit 84.
+
+</p><p>Files are opened in open.inc, closed in close.inc.
+
+</p><h3>Subroutines</h3>
+
+<p>Here is a list of subroutines and what they do:
+
+</p><dl>
+
+<dt>Bcuint
+</dt><dd>Bicubic interpolation of CLM; also returns derivatives.
+
+</dd><dt>Bere
+</dt><dd>Berendsen thermostat: KFLAG=1 damping; KFLAG=other(=5): rescale velocity.
+
+</dd><dt>Bombard
+</dt><dd>Adds a single atom from file bombard.d.
+
+</dd><dt>Caguts
+</dt><dd>Finds forces on atoms from pair potentials.
+
+</dd><dt>Ccorr
+</dt><dd>Call the corrector.
+
+</dd><dt>Cpred
+</dt><dd>Calls Pred (if there are nonrigid molecules) and increments time.
+
+</dd><dt>Damage
+</dt><dd>Checks whether the number of carbons less than 1.8 apart changes, indicating damage..
+
+</dd><dt>Gleq
+</dt><dd>Langevin (friction and random force).
+
+</dd><dt>Hoov
+</dt><dd>Evans-Hoover thermostat.
+
+</dd><dt>Ljcont
+</dt><dd>Seems to give net Lennard-Jones potential exerted by e semi-infinite
+continuum with a normal in the 'ndir' direction, at a location 'surf'.
+
+</dd><dt>Model
+</dt><dd>Calls Caguts (if not tight binding).
+
+</dd><dt>Mtable
+</dt><dd>Creates tables of the potentials V<sub>A</sub> and V<sub>R</sub> from the Brenner paper..
+
+</dd><dt>Param
+</dt><dd>C and H potentials.
+
+</dd><dt>Pibond
+</dt><dd>Finds bonding forces involving C and H atoms.
+
+</dd><dt>Pred
+</dt><dd>Nordsieck scheme prediction of z<sub>n+1</sub> from z<sub>n</sub> only.
+
+</dd><dt>Radic
+</dt><dd>Tricubic interpolation of CLMN.
+
+</dd><dt>Rannum
+</dt><dd>Random number generator.  Its argument is unused..
+
+</dd><dt>Read_data
+</dt><dd>Reads input.d and coord.d.
+
+</dd><dt>Set_md
+</dt><dd>Initialize time and such, also sets ENPR.
+
+</dd><dt>Setgle
+</dt><dd>Set langevin parameters..
+
+</dd><dt>Setin
+</dt><dd>Initialize kt, xmass, noa, sig, eps, pi, bolz, avo, epsi, econv.
+
+</dd><dt>Setpc
+</dt><dd>Set Nordsieck parameters (except F22=1).
+
+</dd><dt>Setpp
+</dt><dd>Calls param and mtable.
+
+</dd><dt>Setran
+</dt><dd>Initializes RNG, called once at the start..
+
+</dd><dt>Setrn
+</dt><dd>Random number initialization. Only called once, inside setran.
+
+</dd><dt>Thermos
+</dt><dd>Chooses thermostat routine.
+
+</dd><dt>Tor
+</dt><dd>Torsional interaction TLMN tricubic interpolation.
+
+</dd><dt>Write_data1
+</dt><dd>Writes to output.d.
+
+</dd><dt>Write_data2
+</dt><dd>Writes to unit 9, output.d, the step number, average energy per atom,
+    some kinetic energy; writes to unit 6 (the screen) total potential energy.
+    Modified by me to write more output to the screen less frequently.
+
+</dd><dt>Write_data3
+</dt><dd>Overwrites 11, coord.d, .
+
+</dd><dt>Xmol
+</dt><dd>Writes to 1, xmol.d data to be converted later to .xyz files..
+
+</dd><dt>Zero
+</dt><dd>Zero velocities.
+
+</dd><dt>vscale
+</dt><dd>Seems to be some attempt to select the scalings that give minimum potential energy.
+
+</dd></dl>
+
+<h3>Variable Names (General)</h3>
+
+<p>The meaning of variable names, as well as I can make out follows.
+See Phys. Rev. B, Vol 42, pp 9458-9471 for formulae and their symbols.
+Also, I define the additional variables:
+
+</p><ul>
+
+<li>e<sub>ijk</sub> = exp(&#945;<sub>ijk</sub> [(r<sub>ij</sub> -
+R<sub>ij</sub><sup>e</sup>) -
+(r<sub>ik</sub>-R<sub>ik</sub><sup>e</sup>)])
+
+</li><li>f<sub>ij</sub> = f<sub>ij</sub>(|r<sub>ij</sub>|)
+
+</li><li>V<sub>ijkl</sub><sup>tor</sup> = V<sub>A</sub>(|r<sub>ij</sub>|)
+A<sub>ij</sub>(N<sub>i</sub><sup>(t</sup>),N<sub>j</sub><sup>(t</sup>),N<sub>ij</sub><sup>conj</sup>)
+sin<sup>2</sup>(&#966;<sub>ijkl</sub>) f<sub>ik</sub> f<sub>jl</sub> (a
+term in the torsional potential)
+
+</li><li>b<sub>ij</sub> is defined by the relation B<sub>ij</sub>
+= b<sub>ij</sub><sup>-&#948;</sup>
+
+</li></ul>
+
+<ul>
+<li>AD(KT1,KT2): D<sub>ij</sub><sup>e</sup> S<sub>ij</sub> exp(AXL R<sub>ij</sub><sup>e</sup>) /(1 - S<sub>ij</sub>) value 1
+</li><li>ATABLE(KT1,KT2,1 + r<sub>ij</sub>/DDtab): attractive potential V<sub>A</sub>/2 function table
+</li><li>ATT: = 3.2; the value of N<sub>i</sub><sup>(t)</sup> at which the evaluation of G<sub>i</sub> for 0&lt;&#952;&lt;109 starts to smoothly switch to a different polynomial
+</li><li>AXL(KT1,KT2): sqrt(2/S<sub>ij</sub>) &#946;<sub>ij</sub> value 1
+</li><li>BD(KT1,KT2): D<sub>ij</sub><sup>e</sup> S<sub>ij</sub> exp(AXL R<sub>ij</sub><sup>e</sup>) /(1 - S<sub>ij</sub>) value 2
+</li><li>BXL(KT1,KT2): sqrt(2/S<sub>ij</sub>) &#946;<sub>ij</sub> value 2
+</li><li>CD(KT1,KT2): D<sub>ij</sub><sup>e</sup> S<sub>ij</sub> exp(AXL R<sub>ij</sub><sup>e</sup>) /(1 - S<sub>ij</sub>) value 3
+</li><li>CLM(KT2,1+N<sub>i</sub><sup>(H)</sup>,1+N<sub>i</sub><sup>(C)</sup>,term): bicubic splines H<sub>CC</sub> and H<sub>CH</sub> in inter2d<sub>iv</sub>.d
+</li><li>CLMN(1,1+N<sub>i</sub><sup>(t)</sup>,1+N<sub>j</sub><sup>(t)</sup>,N<sub>ij</sub><sup>conj</sup>,term): tricubic splines 2 F<sub>CC</sub> from inter3d<sub>iv</sub>.d
+</li><li>CLMN(2,1+N<sub>i</sub><sup>(t)</sup>,1+N<sub>j</sub><sup>(t)</sup>,N<sub>ij</sub><sup>conj</sup>,term): tricubic splines 2 F<sub>CH</sub> from inter3d<sub>ch</sub>.d
+</li><li>CLMN(3,1+N<sub>i</sub><sup>(t)</sup>,1+N<sub>j</sub><sup>(t)</sup>,N<sub>ij</sub><sup>conj</sup>,term): tricubic splines 2 F<sub>HH</sub> from inter3d<sub>h</sub>.d
+</li><li>COM: (in Corr) velocity of center of gravity
+</li><li>COR(K,.): R0(I,.) - R0(j,.) by interacting atom pair index K
+</li><li>CUBE(3): cube dimensions, set to 1e20 if not periodic
+</li><li>CUBE2(3): cube dimensions/2, set to .5e20 if not periodic (never used)
+</li><li>CXL(KT1,KT2): sqrt(2/S<sub>ij</sub>) &#946;<sub>ij</sub> value 3
+</li><li>DATABLE(KT1,KT2,1 + r<sub>ij</sub>/DDtab): attractive potential's derivative * 2 table
+</li><li>DD(KT1,KT2): D<sub>ij</sub><sup>e</sup> exp(DXL R<sub>ij</sub><sup>e</sup>) /(1 - S<sub>ij</sub>)
+</li><li>DDTAB(KT1,KT2): r<sub>ij</sub>-spacing of the potential tables
+</li><li>DELLJ: table spacing for Lennard-Jones potential, 0.001 A
+</li><li>DELTA: time step
+</li><li>DELTSQ: DELTA<sup>2</sup>/2
+</li><li>DEXX1(K): derivative of the attractive potential V<sub>A</sub> / 2 of a pair K
+</li><li>DRTABLE(KT1,KT2,1 + r<sub>ij</sub>/DDtab): repulsive potential's derivative table
+</li><li>DWW(K): derivative of f<sub>ij</sub>(r<sub>ij</sub>) for a pair of neighbors
+</li><li>DXL(KT1,KT2): sqrt(2 S<sub>ij</sub>) &#946;<sub>ij</sub>
+</li><li>EATOM(I): potential energy of an atom
+</li><li>ECONV: Conversion factor: 103.6434 eV per (amu A<sup>2</sup>/fs<sup>2</sup>)
+</li><li>EN(NSMAX): never used, intended to store an energy?
+</li><li>EPS(KT1,KT2): Initially depth &#949; of Lennard-Jones potential in K (i.e. energy kK), converted internally to 4 eV units
+</li><li>EPSS: strength constant in the LJ potential induced by a semi-infinite solid
+</li><li>ETOT(NSMAX): never used, probably intended to store the time history of the total energy
+</li><li>EXX1(K): attractive potential V<sub>A</sub> / 2 of a pair of neighbors K
+</li><li>I2D: potential version number in inter2d<sub>iv</sub>.d
+</li><li>I3D: potential version number in inter3d<sub>iv</sub>.d, inter3d<sub>h</sub>.d, inter3d<sub>ch</sub>.d
+</li><li>IDUM: set to 0 by make_tube, set to 3 by xmol, maybe to indicate that only one parameter, position, exists in the .d file.
+</li><li>IGC: Interpolation index, 4 for 1&gt;=c&gt;-1/3, 3 for -1/3&gt;=c&gt;-1/2, 2 for -1/2&gt;=c&gt;-2/3, 1 for -2/3&gt;=c, with c=cos(&#952;), used for the G<sub>i</sub> function of carbon
+</li><li>IGH: Interpolation index, 3 for 1&gt;=c&gt;-1/2, 2 for -1/2&gt;=c&gt;-5/6, 1 for -5/6&gt;=c&gt;-2/3, with c=cos(&#952;), used for the G<sub>i</sub> function of hydrogen
+</li><li>IN2(term,variable): powers of the terms of the 2D spline
+</li><li>IN2(term,variable): powers of the terms of the 3D spline
+</li><li>IPIB: number of times pibond has been called
+</li><li>IPOT: 1=REBO, 2=Tight binding
+</li><li>IT: in Caguts, the interpolation interval
+</li><li>ITD: potential version number in inter3dtors.d
+</li><li>ITR: 2 is nonmoving, 1=moving and thermostated, other=moving only
+</li><li>IVCT2B: first atom of the pair in the list of interacting atom pairs
+</li><li>JVCT2B: second atom of the pair in the list of interacting atom pairs (&#8800;I)
+</li><li>KEND: number of interacting atom pairs
+</li><li>KFLAG: thermostat flag: -1 Langevin; 1 Berendsen; 2 zero velocity; 3 Evans-Hoover; 5 Berendsen after corrector; 6 minimize energy; 8 rescale to minimize energy
+</li><li>KT2: inverse array to KT
+</li><li>KT: atom code indexed by atom number (C=1, H=2, ...)
+</li><li>KTYPE: atom code kt, but by atom index
+</li><li>KVC:  number of steps to take
+</li><li>LCHECK: 1=both C|H; 2=both Si|Ge; 0=one C|H, one Si|Ge, or distance &gt; RMAX
+</li><li>LCHK: 1=update neighbors list; 2=still OK
+</li><li>LIST: Same as JVCT2B
+</li><li>LSTEP: step number
+</li><li>MAXKB: steps between data writing using write<sub>data2</sub>
+</li><li>MLIST: atoms that get advanced in time (all atoms with itr&#8800;2)
+</li><li>NABORS: start in (IVCT2B,JVCT2B,LIST) of the list of neigbors of an atom
+</li><li>NATX: number of atoms used in tight-binding matrices. MUST be set equal to np before compiling.
+</li><li>NDIR: direction of the surface normal of a neighboring semi-infinite continuum
+</li><li>NLA: never used or assigned a value.  Probably number of Langevin atoms, to be ignored in adaptive time step modifications
+</li><li>NLIST: atoms that get damping and random forces added in Gleq, damping in Bere
+</li><li>NLMAX: maximum number elements in neighbor list
+</li><li>NMA: number of atoms in MLIST
+</li><li>NOA: number of atoms of each type
+</li><li>NP: number of atoms
+</li><li>NPMAX: maximum number of atoms 
+</li><li>NRA: never used or assigned a value.  Probably number of rigid atoms, to be ignored in adaptive time step modifications
+</li><li>NSMAX: (or NSMAS) maximum number of steps.  Derived arrays never used.
+</li><li>NTA: number of atoms in NLIST
+</li><li>NTAB: array size for potential table look-up
+</li><li>NTYPES: maximum number of different types of atoms allowed for Len-Jon potential
+</li><li>NXMOL: number of steps between xmol writes
+</li><li>PSEED: random number seed
+</li><li>R0: position / Nordsieck component 0
+</li><li>R0L: position when the neighborhood list was updated
+</li><li>R1: velocity when read from 11, internally converted into Nordsieck component 1
+</li><li>R2: Nordsieck component 2
+</li><li>R3: Nordsieck component 3
+</li><li>R4: Read from coord.d and written to it but never used anywhere, all zeros
+</li><li>RB1: distance R<sub>ij</sub><sup>(1)</sup> at the start of the bond order potential decay
+</li><li>RB2: distance R<sub>ij</sub><sup>(2)</sup> at which the bond order potential is gone
+</li><li>RCOR: distance between a pair of interacting atoms
+</li><li>REG: exp(&#945;<sub>ijk</sub> [R<sub>ik</sub><sup>e</sup> - R<sub>ij</sub><sup>e</sup>])
+</li><li>RLIST: square interaction distance between two atom types, used to create neighbor list = (R<sub>ij</sub><sup>(2)</sup>)<sup>2</sup>
+</li><li>RLL: .5*RLL is the distance over which molecules can move without changing the neighbor list; RLL must be less than min(RB2)
+</li><li>RMAX: largest square distance at which interaction is computed = (R<sub>ij</sub><sup>(2)</sup>)<sup>2</sup>
+</li><li>RMAXLJ: largest square distance at which LJ interaction is computed; (2.5 &#963;<sub>ij</sub>)<sup>2</sup> or 0 if &#949;=0
+</li><li>RNP: force on the atoms
+</li><li>RPP: gradient of potential energy for a pair
+</li><li>RSLJ: square distance within which atoms might interact through LJ; (sqrt(RMAXLJ)+RLL)<sup>2</sup> or 0 if &#949;=0
+</li><li>RSPL: start of the cubic LJ potential range; 0, or for C-H or Si-G pairs with nonzero &#949; set to 0.95 &#963;<sub>ij</sub>
+</li><li>RSPLS: RSPL<sup>2</sup> or undefined if &#949;=0
+</li><li>RTABLE(KT1,KT2,1 + r<sub>ij</sub>/DDtab): repulsive potential V<sub>R</sub> function table
+</li><li>SIG(KT1,KT2): equilibrium distance &#963; of Lennard-Jones potential, converted internally to its square
+</li><li>SIGS: scale constant in the LJ potential induced by a semi-infinite solid
+</li><li>SPGC: G<sub>C</sub>(&#952;) = &#931;<sub>p=0</sub><sup>5</sup> SPGC(p+1,IGC) cos<sup>p</sup>(&#952;) where IGC depends on the interval in which cos(&#952;) is, with IGC=5 an alternate version for the last interval switched to for large enough N<sub>i</sub><sup>(t)</sup>
+</li><li>SPGH: G<sub>H</sub>(&#952;) = &#931;<sub>p=0</sub><sup>5</sup> SPGC(p+1,IGH) cos<sup>p</sup>(&#952;) where IGH depends on the interval in which cos(&#952;) is
+</li><li>RSPL(KT1,KT2): set to 0.95 &#963;
+</li><li>SURF: NDIR-location of the surface of a neighboring continuum
+</li><li>TABDFC(KT1,KT2,1 + r<sub>ij</sub>/DDtab): cut-off function's derivative table
+</li><li>TABFC(KT1,KT2,1 + r<sub>ij</sub>/DDtab): cut-off function table
+</li><li>TEM: temperature
+</li><li>TLMN(1+N<sub>i</sub><sup>t</sup>,1+N<sub>j</sub><sup>t</sup>,N<sub>ij</sub><sup>conj</sup>,term): tricubic splines for 2 A<sub>ij</sub> from inter3dtors.d
+</li><li>TOTE: total potential energy
+</li><li>TTCONV: 2/(3 NP)
+</li><li>TTIME: total time
+</li><li>VOL: box volume (never used)
+</li><li>WW(K): f<sub>ij</sub>(r<sub>ij</sub>) for a pair of neighbors
+</li><li>XDB: &#945;<sub>ijk</sub>
+</li><li>XH(KT2,1+N<sup>(H)</sup>,1+N<sup>(C)</sup>): values of H<sub>CC</sub> and H<sub>CH</sub> at the spline collocation points
+</li><li>XH1: derivative of XH wrt N<sup>C</sup>
+</li><li>XH2: derivative of XH wrt N<sup>H</sup>
+</li><li>XHC(I,1): 1 + sum of atom i's C neighbors' f<sub>ij</sub> values
+</li><li>XHC(I,2): 1 + sum of atom i's H neighbors' f<sub>ij</sub> values
+</li><li>XMASS: atomic mass, ordered by KT
+</li><li>XM(KT1,KT2): sqrt(XMM) or undefined if &#949;=0
+</li><li>XMM(KT1,KT2): minimum square distance for LJ interaction; 0, or (R<sub>ij</sub><sup>(2)</sup>)<sup>2</sup> for C-H or Si-G pairs with nonzero &#949;
+</li><li>XMMS(KT1,KT2): square radius of the inner range in which we will definitely not compute a LJ potential; corrected to max(0,sqrt(XMM)-RLL)<sup>2</sup> or undefined if &#949;=0
+</li><li>XMT: total mass
+</li><li>XQM: = 3.7; the value of N<sub>i</sub><sup>(t)</sup> at which the evaluation of G<sub>i</sub> for 0&lt;&#952;&lt;109 ends switching to a different polynomial
+</li></ul>
+
+<h3>Variable Names (pibond.f)</h3>
+
+<p>Since subroutine pibond is probably the most impenetrable one,
+I include a separate list of local variables in pibond:
+
+</p><ul>
+<li>AA: d(V<sub>ijkl</sub><sup>tor</sup>)/d(T2) keeping V<sub>A</sub>, A<sub>ij</sub>, T1, f<sub>ik</sub>, f<sub>jl</sub>, Z<sub>ijk</sub>, Z<sub>jil</sub> fixed
+</li><li>AAA1: V<sub>ijkl</sub><sup>tor</sup>/f<sub>ik</sub> f<sub>jl</sub> Z<sub>ijk</sub> Z<sub>jil</sub>
+</li><li>AT2: - T1 d(V<sub>ijkl</sub><sup>tor</sup>)/d(T1) keeping V<sub>A</sub>, A<sub>ij</sub>, T2, f<sub>ik</sub>, f<sub>jl</sub>, Z<sub>ijk</sub>, Z<sub>jil</sub> fixed
+</li><li>ATOR: A<sub>ij</sub>(N<sub>i</sub><sup>(t)</sup>,N<sub>j</sub><sup>(t)</sup>,N<sub>ij</sub><sup>conj</sup>) * 2 in the torsional potential
+</li><li>BIJ: B<sub>ij</sub>
+</li><li>BJI: B<sub>ji</sub>
+</li><li>BTOR: &#931;<sub>kl</sub> sin<sup>2</sup>(&#966;<sub>ijkl</sub>) f<sub>ik</sub> f<sub>jl</sub> in the torsional potential
+</li><li>BTOT: bar B<sub>ij</sub> * 2
+</li><li>CFUNI(NK): F(x<sub>ik</sub>)
+</li><li>CFUNJ(NL): F(x<sub>jl</sub>)
+</li><li>CJ: r<sub>i</sub> - r<sub>j</sub> = r<sub>ij</sub>
+</li><li>CK: r<sub>i</sub> - r<sub>k</sub> = r<sub>ik</sub>
+</li><li>CL: r<sub>j</sub> - r<sub>l</sub> = r<sub>jl</sub>
+</li><li>CONJUG: N<sub>ij</sub><sup>conj</sup>
+</li><li>CONK: &#931;<sub>k</sub> f<sub>ik</sub> F(x<sub>ik</sub>)
+</li><li>CONL: &#931;<sub>l</sub> f<sub>jl</sub> F(x<sub>jl</sub>)
+</li><li>COSK(NK): cos(&#952;<sub>ijk</sub>)
+</li><li>COSL(NK): cos(&#952;<sub>jil</sub>)
+</li><li>CRKX: x-component of r<sub>ik</sub> x r<sub>ij</sub>
+</li><li>CRKY: y-component of r<sub>ik</sub> x r<sub>ij</sub>
+</li><li>CRKZ: z-component of r<sub>ik</sub> x r<sub>ij</sub>
+</li><li>CRLX: x-component of r<sub>ij</sub> x r<sub>jl</sub>
+</li><li>CRLY: y-component of r<sub>ij</sub> x r<sub>jl</sub>
+</li><li>CRLZ: z-component of r<sub>ij</sub> x r<sub>jl</sub>
+</li><li>DALDIK: d(G<sub>i</sub>)/d(N<sub>i</sub><sup>(t)</sup>)
+</li><li>DALDJL: d(G<sub>j</sub>)/d(N<sub>j</sub><sup>(t)</sup>)
+</li><li>DATORC: d(A<sub>ij</sub>)/d(N<sub>ij</sub><sup>conj</sup>)
+</li><li>DATORI: d(A<sub>ij</sub>)/d(N<sub>i</sub><sup>(t)</sup>)
+</li><li>DATORJ: d(A<sub>ij</sub>)/d(N<sub>j</sub><sup>(t)</sup>)
+</li><li>DBDZI: d(B<sub>ij</sub>)/d(b<sub>ij</sub>)
+</li><li>DBDZJ: d(B<sub>ji</sub>)/d(b<sub>ji</sub>)
+</li><li>DBTOR*: never used
+</li><li>DCFUNI: f<sub>ik</sub> d(F(x<sub>ik</sub>))/d(x<sub>ik</sub>)
+</li><li>DCFUNJ: f<sub>jl</sub> d(F(x<sub>jl</sub>))/d(x<sub>jl</sub>)
+</li><li>DCTIJ(NK): d(cos(&#952;<sub>ijk</sub>))/d(|r<sub>ij</sub>|<sup>2</sup>/2)
+</li><li>DCTIK(NK): d(cos(&#952;<sub>ijk</sub>))/d(|r<sub>ik</sub>|<sup>2</sup>/2)
+</li><li>DCTIL(NL): d(cos(&#952;<sub>jil</sub>))/d(|r<sub>il</sub>|<sup>2</sup>/2)
+</li><li>DCTJI(NL): d(cos(&#952;<sub>jil</sub>))/d(|r<sub>ij</sub>|<sup>2</sup>/2)
+</li><li>DCTJK(NK): d(cos(&#952;<sub>ijk</sub>))/d(|r<sub>jk</sub>|<sup>2</sup>/2)
+</li><li>DCTJL(NL): d(cos(&#952;<sub>jil</sub>))/d(|r<sub>jl</sub>|<sup>2</sup>/2)
+</li><li>DEXNI(1): d(H<sub>ij</sub>)/d(N<sub>i</sub><sup>(C)</sup>)
+</li><li>DEXNI(2): d(H<sub>ij</sub>)/d(N<sub>i</sub><sup>(H)</sup>)
+</li><li>DEXNJ(1): d(H<sub>ji</sub>)/d(N<sub>j</sub><sup>(C)</sup>)
+</li><li>DEXNJ(2): d(H<sub>ji</sub>)/d(N<sub>j</sub><sup>(H)</sup>)
+</li><li>DFCK: d(FCK)/d(|r<sub>ik</sub>|)
+</li><li>DFCL: d(FCL)/d(|r<sub>jl</sub>|)
+</li><li>DGDTHET: d(G<sub>i</sub>)/d(cos &#952;<sub>ijk</sub>) respectively d(G<sub>j</sub>)/d(cos &#952;<sub>jil</sub>)
+</li><li>DRADI: d(bar B<sub>ij</sub>)/d(N<sub>i</sub><sup>(t)</sup>) * 2
+</li><li>DRADJ: d(bar B<sub>ij</sub>)/d(N<sub>j</sub><sup>(t)</sup>) * 2
+</li><li>DRDC: d(bar B<sub>ij</sub>)/d(N<sub>ij</sub><sup>conj</sup>) * 2
+</li><li>DT1DIJ: d(T1)/d(|r<sub>ij</sub>|<sup>2</sup>/2)/T1
+</li><li>DT1DIK: d(T1)/d(|r<sub>ik</sub>|<sup>2</sup>/2)/T1
+</li><li>DT1DIL: d(T1)/d(|r<sub>il</sub>|<sup>2</sup>/2)/T1
+</li><li>DT1DJK: d(T1)/d(|r<sub>jk</sub>|<sup>2</sup>/2)/T1
+</li><li>DT1DJL: d(T1)/d(|r<sub>jl</sub>|<sup>2</sup>/2)/T1
+</li><li>DT2DIJ(.): d(T2)/d(r<sub>ij</sub>(.))
+</li><li>DT2DIK(.): d(T2)/d(r<sub>ik</sub>(.))
+</li><li>DT2DJL(.): d(T2)/d(r<sub>jl</sub>(.))
+</li><li>EXNIJ: H<sub>ij</sub>
+</li><li>EXNJI: H<sub>ji</sub>
+</li><li>EXX: e<sub>ijk</sub> = exp(&#945;<sub>ijk</sub>[(r<sub>ij</sub> - R<sub>ij</sub><sup>e</sup>) - (r<sub>ik</sub>-R<sub>ik</sub><sup>e</sup>)]) respectively e<sub>jil</sub>
+</li><li>FCK: f<sub>ik</sub> (modified for H to R<sub>ij</sub><sup>1</sup> = 1.3, R<sub>ij</sub><sup>2</sup> = 1.6)
+</li><li>FCL: f<sub>jl</sub> (modified for H to R<sub>ij</sub><sup>1</sup> = 1.3, R<sub>ij</sub><sup>2</sup> = 1.6)
+</li><li>GANGLE1: alternate value of GANGLE used for high N<sub>i</sub><sup>(t)</sup> or  N<sub>j</sub><sup>(t)</sup>
+</li><li>GANGLE: G<sub>i</sub>(&#952;<sub>ijk</sub>) respectively G<sub>j</sub>(&#952;<sub>jil</sub>)
+</li><li>IG: G<sub>i</sub>-interpolation interval index
+</li><li>J: pair list index of pairs with i the first atom
+</li><li>JN: j value, with i<j <li="">KI: KTYPE(i)
+</j></li><li>KIKJ: KI+KJ
+</li><li>KJ: KTYPE(j)
+</li><li>KK: KTYPE(k)
+</li><li>KN: second neighbor k&#8800;j to i
+</li><li>L: pair list index of pairs with j the first atom
+</li><li>NK: counts number of secondary neighbors k of i
+</li><li>NL: counts number of secondary neighbors l of j
+</li><li>QI: N<sub>i</sub><sup>(t)</sup> = N<sub>i</sub><sup>(C)</sup> + N<sub>i</sub><sup>(H)</sup> (does not include j)
+</li><li>QJ: N<sub>j</sub><sup>(t)</sup> = N<sub>j</sub><sup>(C)</sup> + N<sub>j</sub><sup>(H)</sup> (does not include i)
+</li><li>RCK: |r<sub>ik</sub>|
+</li><li>RCL: |r<sub>jl</sub>|
+</li><li>RSQ2: |r<sub>jk</sub>|<sup>2</sup> respectively |r<sub>il</sub>|<sup>2</sup>
+</li><li>RSQ3: |r<sub>ik</sub>|<sup>2</sup> respectively |r<sub>jl</sub>|<sup>2</sup>
+</li><li>RSQIJ: |r<sub>ij</sub>|<sup>2</sup>
+</li><li>S3: |r<sub>ik</sub>| respectively |r<sub>jl</sub>|
+</li><li>SDALIK: d(&#931;<sub>k</sub> G<sub>i</sub> f<sub>ij</sub> e<sub>ijk</sub>)/d(N<sub>i</sub><sup>(t)</sup>)
+</li><li>SDALJL: d(&#931;<sub>l</sub> G<sub>j</sub> f<sub>ji</sub> e<sub>jil</sub>)/d(N<sub>j</sub><sup>(t)</sup>)
+</li><li>SIJ: |r<sub>ij</sub>|
+</li><li>SINK(NK): sin(&#952;<sub>ijk</sub>)
+</li><li>SINL(NK): sin(&#952;<sub>jil</sub>)
+</li><li>SSUMK: &#931;<sub>k</sub> G<sub>i</sub> f<sub>ij</sub> e<sub>ijk</sub>
+</li><li>SSUML: &#931;<sub>l</sub> G<sub>j</sub> f<sub>ji</sub> e<sub>jil</sub>
+</li><li>T1: |r<sub>ik</sub> x r<sub>ij</sub>| |r<sub>jl</sub> x r<sub>ji</sub>|
+</li><li>T2: (r<sub>ik</sub> x r<sub>ij</sub>) . (r<sub>jl</sub> x r<sub>ji</sub>); negative if k and l point to the same side of i-j
+</li><li>VATT: V<sub>A</sub> / 2
+</li><li>VDBDI: d(V)/d(b<sub>ij</sub>)
+</li><li>VDBDJ: d(V)/d(b<sub>ji</sub>)
+</li><li>VDRDC: d(V)/d(N<sub>ij</sub><sup>conj</sup>)
+</li><li>VDRDI: d(V)/d(N<sub>i</sub><sup>(t)</sup>)
+</li><li>VDRDJ: d(V)/d(N<sub>j</sub><sup>(t)</sup>)
+</li><li>XK: r<sub>j</sub> - r<sub>k</sub> = r<sub>jk</sub>
+</li><li>XL: r<sub>i</sub> - r<sub>l</sub> = r<sub>il</sub>
+</li><li>XNI(1): = 1 + N<sub>i</sub><sup>(C)</sup>  = 1 + atom i's C neighbors f<sub>ik</sub> values excluding j
+</li><li>XNI(2): = 1 + N<sub>i</sub><sup>(H)</sup>  = 1 + atom i's C neighbors f<sub>ik</sub> values excluding j
+</li><li>XNJ(1): = 1 + N<sub>j</sub><sup>(C)</sup>  = 1 + atom j's C neighbors f<sub>jl</sub> values excluding i
+</li><li>XNJ(2): = 1 + N<sub>j</sub><sup>(H)</sup>  = 1 + atom j's C neighbors f<sub>jl</sub> values excluding i
+</li><li>XNT1: N<sub>i</sub><sup>(t)</sup>+1
+</li><li>XNT2: N<sub>j</sub><sup>(t)</sup>+1
+</li><li>XSIJ: d(&#931;<sub>k</sub> G<sub>i</sub> f<sub>ij</sub> e<sub>ijk</sub>)/d(|r<sub>ij</sub>|<sup>2</sup>/2)
+</li><li>XSIK(NK): d(G<sub>i</sub> f<sub>ij</sub> e<sub>ijk</sub>)/d(|r<sub>ik</sub>|<sup>2</sup>/2)
+</li><li>XSIL(NL): d(G<sub>j</sub> f<sub>ji</sub> e<sub>jil</sub>)/d(|r<sub>il</sub>|<sup>2</sup>/2)
+</li><li>XSJI:  d(&#931;<sub>l</sub> G<sub>j</sub> f<sub>ji</sub> e<sub>jil</sub>)/d(|r<sub>ij</sub>|<sup>2</sup>/2)
+</li><li>XSJK(NK): d(G<sub>i</sub> f<sub>ij</sub> e<sub>ijk</sub>)/d(|r<sub>jk</sub>|<sup>2</sup>/2)
+</li><li>XSJL(NL): d(G<sub>j</sub> f<sub>ji</sub> e<sub>jil</sub>)/d(|r<sub>jl</sub>|<sup>2</sup>/2)
+</li><li>XX: x<sub>ik</sub> respectively 
+</li><li>ZF1: Z<sub>ijk</sub>
+</li><li>ZF1DCT: d(Z<sub>ijk</sub>)/d(cos(&#952;<sub>ijk</sub>))
+</li><li>ZF2: Z<sub>jil</sub>
+</li><li>ZF2DCT: d(Z<sub>jil</sub>)/d(cos(&#952;<sub>jil</sub>))
+</li></ul>
+
+<hr><a href="http://www.eng.fsu.edu/~dommelen/research/nano/brenner/index.html#advinfo">Return</a>
+
+
+
+</body></html>
