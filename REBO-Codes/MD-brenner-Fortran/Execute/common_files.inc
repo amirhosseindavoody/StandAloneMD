@@ -1,5 +1,0 @@
-      include 'parameters.inc' 
-      include '../Commons/common_md.inc'
-      include '../Commons/common_ch.inc' 
-      include '../Commons/common_lj_new.inc' 
-      include '../Commons/common_tb.inc' 

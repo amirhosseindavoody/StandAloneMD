@@ -137,14 +137,14 @@ C
                                DGDTHET=DGDTHET+ALI*(DGDTHET1-DGDTHET)
                           ENDIF
                      ELSE
-                     IG=IGH(INT(-COSTH*12.0D0)+13)
-                     GANGLE=SPGH(1,IG)+SPGH(2,IG)*COSTH
-                     DGDTHET=SPGH(2,IG)
-                     DO 46 JJ=3,6
-                          GANGLE=GANGLE+SPGH(JJ,IG)*(COSTH**(JJ-1))
-                          DGDTHET=DGDTHET+SPGH(JJ,IG)*
-     &                             (JJ-1)*(COSTH**(JJ-2))
-46                   CONTINUE
+                       IG=IGH(INT(-COSTH*12.0D0)+13)
+                       GANGLE=SPGH(1,IG)+SPGH(2,IG)*COSTH
+                       DGDTHET=SPGH(2,IG)
+                       DO 46 JJ=3,6
+                            GANGLE=GANGLE+SPGH(JJ,IG)*(COSTH**(JJ-1))
+                            DGDTHET=DGDTHET+SPGH(JJ,IG)*
+       &                             (JJ-1)*(COSTH**(JJ-2))
+46                     CONTINUE
                      ENDIF
                      FC=WW(K)
                      DFC=DWW(K)

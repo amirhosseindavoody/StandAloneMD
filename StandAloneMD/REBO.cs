@@ -10,17 +10,15 @@ namespace StandAloneMD
     {
 		private int NDIHED;
 		private int NTAB = 10000; // this is the array size of potential lookup table.
-		private int KEND; // this is the total number of neighbor pairs that are calculated and stored in LIST, IVCT2B, and JVCT2B
         private int[] IGC, IGH;
 		private int[] NABORS;
-		private List<int> LIST = new List<int>();
 		private List<int> IVCT2B = new List<int>();
 		private List<int> JVCT2B = new List<int>();
 		private int[] LCHECK;
         private int[,] IN2, IN3;
 		private double RLL = 0.5; // this is most probably the shell thickness used for neighbor list calculation
         private double SIGMA, EPSI, XQ, ATT, XQM, PQ, PIDT, XXDB;
-		private double tote;
+		private double tote; // total potential energy
 		private double[] XN1, XTN2, XTN1, ADB, CDB, CDB2, DDB, DDB2, HDB;
 		private double[] eatom;
 		private double[] RCOR, WW, DWW, EXX1, DEXX1;
@@ -715,12 +713,13 @@ namespace StandAloneMD
 			}
 		}
 
-		public void caguts()
+
+		public void caguts() // This function calculates the neighbor list and the pair potentials
 		{
 			// calculate two-body forces and neighbor list for hydrocarbons
 			double[] RR = new double[3];
 			double[] RI = new double[3];
-			int[] NABORS = new int[Atom.AllAtoms.Count + 1];
+			NABORS = new int[Atom.AllAtoms.Count+1];
 
 			RNP = new double[Atom.AllAtoms.Count, 3];
 			Array.Clear(RNP, 0, Atom.AllAtoms.Count * 3);
@@ -729,17 +728,16 @@ namespace StandAloneMD
 
 			eatom = new double[Atom.AllAtoms.Count];
 			Array.Clear(eatom, 0, eatom.Length);
-
+			int KEND = 0; // this is the total number of neighbor pairs that are calculated and stored in LIST, IVCT2B, and JVCT2B
 			if (neighborListFlag)
 			{
 				// set up neighbor list
 				int K = 0;
-				LIST.Clear();
 				IVCT2B.Clear();
 				JVCT2B.Clear();
 				for (int I = 0; I<Atom.AllAtoms.Count; I++)
 				{
-					NABORS[I] = K + 1;
+					NABORS[I] = K;
 					RI[0] = Atom.AllAtoms[I].position[0];
 					RI[1] = Atom.AllAtoms[I].position[1];
 					RI[2] = Atom.AllAtoms[I].position[2];
@@ -789,7 +787,6 @@ namespace StandAloneMD
 							if (rsq <= RLIS)
 							{
 								K++;
-								LIST.Add(J);
 								IVCT2B.Add(I);
 								JVCT2B.Add(J);
 							}
@@ -798,8 +795,8 @@ namespace StandAloneMD
 						}
 					}
 				}
-				NABORS[Atom.AllAtoms.Count] = K+1;
-				KEND = K;
+				KEND = K; // KEND is number of interacting atom pairs
+				NABORS[Atom.AllAtoms.Count] = K;
 			}
 
 			//debug
@@ -924,6 +921,925 @@ namespace StandAloneMD
 			// add a check to see if the atoms are carbohydrates or si-germanium and perform the corresponding routines
 			// call pibond for carbohydrates
 			// call sili_germ for silicon germanium atoms.
+
+			for (int i = 0; i < Atom.AllAtoms.Count; i++ )
+			{
+				if ((Atom.AllAtoms[i].atomicNumber != 1) && (Atom.AllAtoms[i].atomicNumber != 6))
+				{
+					Console.WriteLine("Atoms are not hydrogen or carbon! Correct potential type should be used!!!!");
+					Console.ReadLine();
+				}
+			}
+
+			pibond();
+
+		}
+
+		private void pibond()
+		{
+			double[,] XHC = new double[Atom.AllAtoms.Count,2];
+
+
+
+			// Find number of hydrogens and carbons connected to each atom
+			for (int i = 0; i < Atom.AllAtoms.Count; i++ )
+			{
+				int JBEGIN = NABORS[i];
+				int JEND = NABORS[i + 1];
+
+				XHC[i, 1] = 1;
+				XHC[i, 2] = 1;
+				for (int j = JBEGIN; j < JEND; j++ )
+				{
+					int JN = JVCT2B[j];
+					int kj = 5;
+
+					if (Atom.AllAtoms[JN].atomicNumber == 6)
+					{
+						kj = 0;
+					}
+					else if (Atom.AllAtoms[JN].atomicNumber == 1)
+					{
+						kj = 1;
+					}
+					else
+					{
+						Console.WriteLine("Atom types should be either carbon or hydrogen to use REBO potential!");
+						Console.ReadLine();
+						return;
+					}
+
+					XHC[i,kj] = XHC[i,kj] + WW[j];
+					
+
+				}
+
+			}
+
+			// Sum over bonds between atoms I and J
+			for (int i = 0; i < Atom.AllAtoms.Count; i++ )
+			{
+				int JBEGIN = NABORS[i];
+				int JEND = NABORS[i + 1];
+
+				int ki = 5;
+				if (Atom.AllAtoms[i].atomicNumber == 6)
+				{
+					ki = 0;
+				}
+				else if (Atom.AllAtoms[i].atomicNumber == 1)
+				{
+					ki = 1;
+				}
+				else
+				{
+					Console.WriteLine("Atom types should be either carbon or hydrogen to use REBO potential!");
+					Console.ReadLine();
+					return;
+				}
+
+				for (int j=JBEGIN; j<(JEND+1); j++)
+				{
+					int jn = JVCT2B[j];
+					if (i < jn)
+					{
+						double[] CJ = new double[3];
+						for (int mm=0; mm<3; mm++)
+						{
+							CJ[mm] = COR[j, mm];
+						}
+						double SIJ = RCOR[j];
+						double RSQIJ = SIJ * SIJ;
+
+						int kj = 5;
+						if (Atom.AllAtoms[j].atomicNumber == 6)
+						{
+							kj = 0;
+						}
+						else if (Atom.AllAtoms[j].atomicNumber == 1)
+						{
+							kj = 1;
+						}
+						else
+						{
+							Console.WriteLine("Atom types should be either carbon or hydrogen to use REBO potential!");
+							Console.ReadLine();
+							return;
+						}
+
+						int kikj = ki + kj;
+
+						// I side of bond
+						int nk = 0;
+						List<double[]> xk = new List<double[]>();
+						List<double> cosk = new List<double>();
+						List<double> sink = new List<double>();
+						List<double> cfuni = new List<double>();
+						List<double> dcfuni = new List<double>();
+						List<double> dctjk = new List<double>();
+						List<double> dctij = new List<double>();
+						List<double> dctik = new List<double>();
+						List<double> xsik = new List<double>();
+						List<double> xsjk = new List<double>();
+
+
+						double xsij = 0;
+						double ssumk = 0;
+						double conk = 0;
+						double[] xni = new double[2] { XHC[i, 0], XHC[i, 1] };
+						xni[kj] = xni[kj] - WW[j];
+						double qi = xni[0] + xni[1] - 2.0e0;
+						double sdalik = 0;
+
+						for (int k=JBEGIN; k<JEND; k++)
+						{
+							double ali = 0;
+							double dali = 0;
+							double daldik = 0;
+							double gangle = 0;
+							double dgdthet = 0;
+
+							if ((k != j))
+							{
+								int KN = JVCT2B[k];
+								
+								int kk = 5;
+								if (Atom.AllAtoms[k].atomicNumber == 6)
+								{
+									kk = 0;
+								}
+								else if (Atom.AllAtoms[k].atomicNumber == 1)
+								{
+									kk = 1;
+								}
+								else
+								{
+									Console.WriteLine("Atom types should be either carbon or hydrogen to use REBO potential!");
+									Console.ReadLine();
+									return;
+								}
+
+								nk = nk + 1;
+								double s3 = RCOR[k];
+								double rsq3 = s3 * s3;
+								double rsq2 = 0;
+
+								double[] tempArray = new double[3];
+								for (int mm=0; mm<3; mm++)
+								{
+									tempArray[mm] = COR[k, mm] - CJ[mm];
+									rsq2 = rsq2 + tempArray[mm] * tempArray[mm];
+								}
+								xk.Add(tempArray);
+
+								double ss = 2.0 * SIJ * s3;
+								double rr = RSQIJ - rsq3;
+								double costh = (RSQIJ + rsq3 - rsq2) / ss;
+								if (costh > 1.0) costh = 1.0;
+								if (costh < -1.0) costh = -1.0;
+								cosk.Add(costh);
+								sink.Add(Math.Sqrt(1.0 - costh * costh));
+								if (Math.Acos(costh) > Math.PI) sink[nk - 1] = -sink[nk - 1];
+								
+
+								if (ki == 0)
+								{
+									int ig = IGC[(int)(-costh * 12.0) + 13] - 1;
+									if (ig != 3)
+									{
+										gangle = SPGC[0, ig] + SPGC[1, ig] * costh;
+										dgdthet = SPGC[1, ig];
+										for (int jj = 2; jj<6; jj++)
+										{
+											gangle = gangle + SPGC[jj, ig] * (Math.Pow(costh, jj));
+											dgdthet = dgdthet + SPGC[jj, ig] * ((double)jj) * Math.Pow(costh, jj - 1);
+										}
+									}
+									else
+									{
+										ali = 0;
+										dali = 0;
+										if (qi < XQM)
+										{
+											ali = 1.0;
+											if (qi > ATT)
+											{
+												double dtemp = PQ * (qi - ATT);
+												ali = (1.0 + Math.Cos(dtemp)) / 2.0;
+												dali = -PQ / 2.0 * Math.Sin(dtemp);
+											}
+										}
+										gangle = SPGC[0, ig] + SPGC[1, ig] * costh;
+										dgdthet = SPGC[1, ig];
+										int ig1 = ig + 1;
+										double gangle1 = SPGC[0, ig1] + SPGC[1, ig1] * costh;
+										double dgdthet1 = SPGC[1, ig1];
+										for (int jj=2; jj<6; jj++)
+										{
+											gangle = gangle + SPGC[jj, ig] * Math.Pow(costh, jj);
+											dgdthet = dgdthet + SPGC[jj, ig] * ((double)jj) * Math.Pow(costh, jj - 1);
+											gangle1 = gangle1 + SPGC[jj, ig1] * Math.Pow(costh, jj);
+											dgdthet1 = dgdthet1 + SPGC[jj, ig1] * ((double)jj) * Math.Pow(costh, jj - 1);
+										}
+										daldik = dali * (gangle1 - gangle);
+										gangle = gangle + ali * (gangle1 - gangle);
+										dgdthet = dgdthet + ali * (dgdthet1 - dgdthet);
+									}
+								}
+								else
+								{
+									int ig = IGH[(int)(-costh * 12.0) + 13]-1;
+									gangle = SPGH[0, ig] + SPGH[1, ig] * costh;
+									dgdthet = SPGH[1, ig];
+									for (int jj=2; jj<6; jj++)
+									{
+										gangle = gangle + SPGH[jj, ig] * Math.Pow(costh, jj);
+										dgdthet = dgdthet + SPGH[jj, ig] * (double)(jj) * Math.Pow(costh, jj - 1);
+									}
+								}
+
+								double fc = WW[k];
+								double dfc = DWW[k];
+								cfuni.Add(0);
+								dcfuni.Add(0);
+
+								if (kk == 0)
+								{
+									double xx = XHC[KN, 0] + XHC[KN, 1] - fc - 2.0;
+									if (xx < 3.0)
+									{
+										if(xx <= 2.0)
+										{
+											cfuni[nk - 1] = 1.0;
+										}
+										else
+										{
+											double px = Math.PI * (xx - 2.0);
+											cfuni[nk-1] = (1.0+Math.Cos(px))/2.0;
+											dcfuni[nk - 1] = -fc * Math.Sin(px) * Math.PI / 2.0;
+										}
+									}
+								}
+								conk = conk + fc * cfuni[nk - 1];
+
+								double exx = 0;
+								if (XDB[ki,kj,kk] != 0)
+								{
+									exx = REG[ki, kj, kk] * Math.Exp(XDB[ki, kj, kk] * (SIJ - s3));
+								}
+								else
+								{
+									exx = 1.0;
+								}
+
+								double dctdjk = -2.0 / ss;
+								double dctdij = (rr + rsq2) / (ss * RSQIJ);
+								double dctdik = (-rr + rsq2) / (ss * rsq3);
+								dctjk.Add(dctdjk);
+								dctij.Add(dctdij);
+								dctik.Add(dctdik);
+								double gs = gangle * exx;
+								ssumk = ssumk + fc * gs;
+								double xtemp = fc * exx * dgdthet;
+								double gfx = gs * fc * XDB[ki, kj, kk];
+								xsij = xsij + xtemp * dctdij + gfx / SIJ;
+								xsik.Add((gs * dfc - gfx) / s3 + xtemp * dctdik);
+								sdalik = sdalik + exx * fc * daldik;
+								xsjk.Add(xtemp * dctdjk);
+							}
+						}
+
+						// J side of bond
+						int nl = 0;
+						List<double[]> xl = new List<double[]>();
+						List<double> cosl = new List<double>();
+						List<double> sinl = new List<double>();
+						List<double> cfunj = new List<double>();
+						List<double> dcfunj = new List<double>();
+						
+						List<double> dctil = new List<double>();
+						List<double> dctji = new List<double>();
+						List<double> dctjl = new List<double>();
+						List<double> xsjl = new List<double>();
+						List<double> xsil = new List<double>();
+						
+
+						double xsji = 0;
+						double ssuml = 0;
+						double conl = 0;
+						int LBEGIN = NABORS[jn];
+						int LEND = NABORS[jn+1];
+						double[] xnj = new double[2] { XHC[jn, 0], XHC[jn, 1] };
+						xnj[ki] = xnj[ki] - WW[j];
+						double qj = xnj[0] + xnj[1] - 2.0e0;
+						double sdaljl = 0;
+
+						for (int l = LBEGIN; l < LEND; l++)
+						{
+							double alj = 0;
+							double dalj = 0;
+							double daldjl = 0;
+							int ln = JVCT2B[l];
+							double gangle = 0;
+							double dgdthet = 0;
+
+							if ((ln != i))
+							{
+
+								int kl = 5;
+								if (Atom.AllAtoms[l].atomicNumber == 6)
+								{
+									kl = 0;
+								}
+								else if (Atom.AllAtoms[l].atomicNumber == 1)
+								{
+									kl = 1;
+								}
+								else
+								{
+									Console.WriteLine("Atom types should be either carbon or hydrogen to use REBO potential!");
+									Console.ReadLine();
+									return;
+								}
+
+								nl = nl + 1;
+								double s3 = RCOR[l];
+								double rsq3 = s3 * s3;
+								double rsq2 = 0;
+
+								double[] tempArray = new double[3];
+								for (int mm = 0; mm < 3; mm++)
+								{
+									tempArray[mm] = COR[l, mm] - CJ[mm];
+									rsq2 = rsq2 + tempArray[mm] * tempArray[mm];
+								}
+								xl.Add(tempArray);
+
+								double ss = 2.0 * SIJ * s3;
+								double rr = RSQIJ - rsq3;
+								double costh = (RSQIJ + rsq3 - rsq2) / ss;
+								if (costh > 1.0) costh = 1.0;
+								if (costh < -1.0) costh = -1.0;
+								cosl.Add(costh);
+								sinl.Add(Math.Sqrt(1.0 - costh * costh));
+								if (Math.Acos(costh) > Math.PI) sinl[nl - 1] = -sinl[nl - 1];
+
+								if (kj == 0)
+								{
+									int ig = IGC[(int)(-costh * 12.0) + 13] - 1;
+									if (ig != 3)
+									{
+										gangle = SPGC[0, ig] + SPGC[1, ig] * costh;
+										dgdthet = SPGC[1, ig];
+										for (int jj = 2; jj < 6; jj++)
+										{
+											gangle = gangle + SPGC[jj, ig] * (Math.Pow(costh, jj));
+											dgdthet = dgdthet + SPGC[jj, ig] * ((double)jj) * Math.Pow(costh, jj - 1);
+										}
+									}
+									else
+									{
+										alj= 0;
+										dalj = 0;
+										if (qj < XQM)
+										{
+											alj = 1.0;
+											if (qj > ATT)
+											{
+												double dtemp = PQ * (qj - ATT);
+												alj = (1.0 + Math.Cos(dtemp)) / 2.0;
+												dalj = -PQ / 2.0 * Math.Sin(dtemp);
+											}
+										}
+										gangle = SPGC[0, ig] + SPGC[1, ig] * costh;
+										dgdthet = SPGC[1, ig];
+										int ig1 = ig + 1;
+										double gangle1 = SPGC[0, ig1] + SPGC[1, ig1] * costh;
+										double dgdthet1 = SPGC[1, ig1];
+										for (int jj = 2; jj < 6; jj++)
+										{
+											gangle = gangle + SPGC[jj, ig] * Math.Pow(costh, jj);
+											dgdthet = dgdthet + SPGC[jj, ig] * ((double)jj) * Math.Pow(costh, jj - 1);
+											gangle1 = gangle1 + SPGC[jj, ig1] * Math.Pow(costh, jj);
+											dgdthet1 = dgdthet1 + SPGC[jj, ig1] * ((double)jj) * Math.Pow(costh, jj - 1);
+										}
+										daldjl = dalj * (gangle1 - gangle);
+										gangle = gangle + alj * (gangle1 - gangle);
+										dgdthet = dgdthet + alj * (dgdthet1 - dgdthet);
+									}
+								}
+								else
+								{
+									int ig = IGH[(int)(-costh * 12.0) + 13] - 1;
+									gangle = SPGH[0, ig] + SPGH[1, ig] * costh;
+									dgdthet = SPGH[1, ig];
+									for (int jj = 2; jj < 6; jj++)
+									{
+										gangle = gangle + SPGH[jj, ig] * Math.Pow(costh, jj);
+										dgdthet = dgdthet + SPGH[jj, ig] * (double)(jj) * Math.Pow(costh, jj - 1);
+									}
+								}
+
+								double fc = WW[l];
+								double dfc = DWW[l];
+								cfunj.Add(0);
+								dcfunj.Add(0);
+
+								if (kl == 0)
+								{
+									double xx = XHC[ln, 0] + XHC[ln, 1] - fc - 2.0;
+									if (xx < 3.0)
+									{
+										if (xx <= 2.0)
+										{
+											cfunj[nl - 1] = 1.0;
+										}
+										else
+										{
+											double px = Math.PI * (xx - 2.0);
+											cfunj[nk - 1] = (1.0 + Math.Cos(px)) / 2.0;
+											dcfunj[nk - 1] = -fc * Math.Sin(px) * Math.PI / 2.0;
+										}
+									}
+								}
+								conl = conl + fc * cfunj[nk - 1];
+
+								double exx = 0;
+								if (XDB[kj, ki, kl] != 0)
+								{
+									exx = REG[kj, ki, kl] * Math.Exp(XDB[kj, ki, kl] * (SIJ - s3));
+								}
+								else
+								{
+									exx = 1.0;
+								}
+
+								double dctdil = -2.0 / ss;
+								double dctdji = (rr + rsq2) / (ss * RSQIJ);
+								double dctdjl = (-rr + rsq2) / (ss * rsq3);
+								dctil.Add(dctdil);
+								dctji.Add(dctdji);
+								dctjl.Add(dctdjl);
+								double gs = gangle * exx;
+								ssuml = ssuml + fc * gs;
+								double xtemp = fc * exx * dgdthet;
+								double gfx = gs * fc * XDB[kj, ki, kl];
+								xsji = xsji + xtemp * dctdji + gfx / SIJ;
+								xsjl.Add((gs * dfc - gfx) / s3 + xtemp * dctdjl);
+								sdaljl = sdaljl + exx * fc * daldjl;
+								xsil.Add(xtemp * dctdil);
+							}
+						}
+
+						double exnij = 0;
+						double[] dexni = new double[2] { 0, 0 };
+
+						if (ki == 0)
+						{
+							int nh = (int)(xni[1] + Math.Pow(1,-12));
+							int nc = (int)(xni[0] + Math.Pow(1, -12));
+							if ((Math.Abs((double)nh - xni[1]) > Math.Pow(1, -8)) || (Math.Abs((double)nc - xni[0]) > Math.Pow(1, -8)))
+							{
+								bcuint(ki, kj, xni[1], xni[0], nh-1, nc-1, exnij, dexni[1], dexni[0]);
+							}
+							else
+							{
+								exnij = XH[kj, nh-1, nc-1];
+								dexni[1] = XH1[kj, nh - 1, nc - 1];
+								dexni[0] = XH2[kj, nh - 1, nc - 1];
+							}
+
+						}
+
+						double exnji = 0;
+						double[] dexnj = new double[2] { 0, 0 };
+						if (kj == 0)
+						{
+							int nh = (int)(xnj[1] + Math.Pow(1, -12));
+							int nc = (int)(xnj[0] + Math.Pow(1, -12));
+							if ((Math.Abs((double)nh - xnj[1]) > Math.Pow(1, -8)) || (Math.Abs((double)nc - xnj[0]) > Math.Pow(1, -8)))
+							{
+								bcuint(kj, ki, xnj[1], xnj[0], nh - 1, nc - 1, exnji, dexnj[1], dexnj[0]);
+							}
+							else
+							{
+								exnji = XH[ki, nh - 1, nc - 1];
+								dexnj[1] = XH1[ki, nh - 1, nc - 1];
+								dexnj[0] = XH2[ki, nh - 1, nc - 1];
+							}
+						}
+
+						double dij = 1.0 + exnij + ssumk;
+						double bij = 1.0 / Math.Sqrt(dij);
+						double dji = 1.0 + exnji+ ssuml;
+						double bji = 1.0 / Math.Sqrt(dji);
+						double dbdzi = -0.5 * bij / dij;
+						double dbdzj = -0.5 * bji / dji;
+						double vatt = EXX1[j];
+						double dradi = 0;
+						double dradj = 0;
+						double drdc = 0;
+						double conjug = 1.0 + (conk * conk) + (conl * conl);
+						double xnt1 = xni[0] + xni[2] - 1.0;
+						double xnt2 = xnj[0] + xnj[2] - 1.0;
+						
+						double rad=0;
+						radic(ki, kj, xnt1, xnt2, conjug, rad, dradi, dradj, drdc);
+
+						double btot = bji + bij + rad;
+
+						//dihedral terms
+						if (kikj+2 == NDIHED)
+						{
+
+							double btor = 0;
+
+							double ator = 0;
+							double datori = 0;
+							double datorj = 0;
+							double datorc = 0;
+							tor(xnt1, xnt2, conjug, ator, datori, datorj, datorc);
+
+							if (Math.Abs(ator) > Math.Pow(1.0,-8))
+							{
+								nk = 0;
+								for (int k=JBEGIN; k<JEND; k++)
+								{
+									if (k != j)
+									{
+										nk = nk + 1;
+										if (Math.Abs(sink[nk-1]) >= 0.1)
+										{
+											double sink2 = sink[nk-1] * sink[nk-1];
+											int kn = JVCT2B[k];
+
+											double[] ck = new double[3] { COR[k, 0], COR[k, 1], COR[k, 2] };
+											double rck = RCOR[k];
+
+											double fck = 0;
+											double dfck = 0;
+											if(Atom.AllAtoms[kn].atomicNumber == 1)
+											{
+												fck = 1.0;
+												dfck = 0;
+												if (rck < 1.6)
+												{
+													if(rck >= 1.3)
+													{
+														double dtemp = PIDT * (rck - 1.3);
+														fck = (1.0 + Math.Cos(dtemp)) / 2.0;
+														dfck = -PIDT / 2.0 * Math.Sin(dtemp);
+													}
+												}
+											}
+											else
+											{
+												fck = WW[k];
+												dfck = DWW[k];
+											}
+
+											nl = 0;
+											for (int l = LBEGIN; l < LEND; l++)
+											{
+												int ln = JVCT2B[l];
+												if (ln != i)
+												{
+													nl = nl + 1;
+													if (Math.Abs(sinl[nl - 1]) >= 0.1)
+													{
+														double sinl2 = sinl[nl - 1] * sinl[nl - 1];
+														double[] cl = new double[3] { COR[l, 0], COR[l, 1], COR[l, 2] };
+														double rcl = RCOR[l];
+														double fcl = 0;
+														double dfcl = 0;
+														if (Atom.AllAtoms[ln].atomicNumber == 1)
+														{
+															fcl = 1.0;
+															dfcl = 0;
+															if (rcl < 1.6)
+															{
+																if (rcl >= 1.3)
+																{
+																	double dtemp = PIDT * (rcl - 1.3);
+																	fcl = (1.0 + Math.Cos(dtemp)) / 2.0;
+																	dfcl = -PIDT / 2.0 * Math.Sin(dtemp);
+																}
+															}
+														}
+														else
+														{
+															fcl = WW[l];
+															dfcl = DWW[l];
+														}
+														double t1 = rck * rcl * SIJ * SIJ * sink[nk - 1] * sinl[nl - 1];
+														double dt1dik = 1.0 / rck / rck - dctik[nk - 1] / sink2 * cosk[nk - 1];
+														double dt1djk = -dctjk[nk - 1] / sink2 * cosk[nk - 1];
+														double dt1djl = 1.0 / rcl / rcl - dctjl[nl - 1] / sinl2 * cosl[nl - 1];
+														double dt1dil = -dctil[nl - 1] / sinl2 * cosl[nl];
+														double dt1dij = 2.0 / SIJ / SIJ - dctij[nk - 1] / sink2 * cosk[nk - 1] - dctji[nl - 1] / sinl2 * cosl[nl - 1];
+
+														double crkx = ck[1] * CJ[2] - CJ[1] * ck[2];
+														double crlx = CJ[1] * cl[2] - cl[1] * CJ[2];
+														double crky = ck[2] * CJ[0] - CJ[2] * ck[0];
+														double crly = CJ[2] * cl[0] - cl[2] * CJ[0];
+														double crkz = ck[0] * CJ[1] - CJ[0] * ck[1];
+														double crlz = CJ[0] * cl[1] - cl[0] * CJ[1];
+
+														double t2 = crkx * crlx + crky * crly + crkz * crlz;
+
+														double cw = t2 / t1;
+														double bt = 1.0 - cw * cw;
+														btor = btor + bt * fck * fcl;
+
+														double[] dt2dik = new double[3] { -CJ[2] * crly + CJ[1] * crlz, -CJ[0] * crlz + CJ[2] * crlx, -CJ[1] * crlx + CJ[0] * crly };
+														double[] dt2djl = new double[3] { -CJ[1] * crkz + CJ[2] * crky, -CJ[2] * crkx + CJ[0] * crkz, -CJ[0] * crky + CJ[1] * crkx };
+														double[] dt2dij = new double[3] { ck[2] * crly - cl[2] * crky - ck[1] * crlz + cl[2] * crkz, ck[0] * crlz - cl[0] * crkz - ck[2] * crlx + cl[2] * crkx, ck[1] * crlx - cl[1] * crkx - ck[0] * crly + cl[0] * crky };
+
+														double aa = -vatt * 2.0 * cw / t1 * ator * fcl * fck;
+														double aaa1 = vatt * bt * ator;
+														double at2 = aa * t2;
+
+														double rp1 = -dt1dij * at2;
+														double rp2 = -dt1dik * at2 + aaa1 * fcl * dfck / rck;
+														double rp3 = -dt1djl * at2 + aaa1 * fck * dfcl / rcl;
+														double rp4 = -dt1djk * at2;
+														double rp5 = -dt1dil * at2;
+
+														for (int mm=0; mm<3; mm++)
+														{
+															double rep = rp1*CJ[mm] + aa*dt2dij[mm];
+															RNP[i, mm] = RNP[i, mm] + rep;
+															RNP[jn, mm] = RNP[jn, mm] - rep;
+
+															rep = rp2 * ck[mm] + aa * dt2dik[mm];
+															RNP[i, mm] = RNP[i, mm] + rep;
+															RNP[kn, mm] = RNP[kn, mm] - rep;
+															
+															rep = rp3 * cl[mm] + aa * dt2djl[mm];
+															RNP[jn, mm] = RNP[jn, mm] + rep;
+															RNP[ln, mm] = RNP[ln, mm] - rep;
+
+															rep = rp4 * xk[nk-1][mm];
+															RNP[jn, mm] = RNP[jn, mm] + rep;
+															RNP[kn, mm] = RNP[kn, mm] - rep;
+
+															rep = rp5 * xl[nl-1][mm];
+															RNP[i, mm] = RNP[i, mm] + rep;
+															RNP[ln, mm] = RNP[ln, mm] - rep;
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+
+							btot = btot + btor * ator;
+							dradi = dradi + datori * btor;
+							dradj = dradj + datorj * btor;
+							drdc = drdc + datorc * btor;
+						} // end dihedral forces
+
+						tote = tote - btot * vatt;
+
+						double vdbdi = vatt * dbdzi;
+						double vdbdj = vatt * dbdzj;
+						double vdrdc = vatt * drdc;
+						double vdrdi = vatt * dradi;
+						double vdrdj = vatt * dradj;
+
+						double rp = vdbdi * xsij + vdbdj * xsji + btot * DEXX1[j];
+						for (int mm=0; mm<3; mm++)
+						{
+							double rep = rp * CJ[mm];
+							RNP[i, mm] = RNP[i, mm] + rep;
+							RNP[jn, mm] = RNP[jn, mm] - rep;
+						}
+
+						// add many-body forces /////////////////////////////////////////////////////////////////////////////
+						// I side of bond
+						nk = 0;
+						for (int k=JBEGIN; k<JEND; k++)
+						{
+							if (k != j)
+							{
+								int kn = JVCT2B[k];
+								int kk = 5;
+								if (Atom.AllAtoms[k].atomicNumber == 6)
+								{
+									kk = 0;
+								}
+								else if (Atom.AllAtoms[k].atomicNumber == 1)
+								{
+									kk = 1;
+								}
+								else
+								{
+									Console.WriteLine("Atom types should be either carbon or hydrogen to use REBO potential!");
+									Console.ReadLine();
+									return;
+								}
+
+								double dwr = DWW[k] / RCOR[k];
+								nk = nk + 1;
+
+								// first neighbors
+								double rp1 = vdbdi * (xsik[nk - 1] + dwr * dexni[kk]) + dwr * (vdrdi + vdrdc * cfuni[nk - 1]) + vdbdi * dwr * sdalik;
+								double rp2 = vdbdi * xsjk[nk - 1];
+								for (int mm=0; mm<3; mm++)
+								{
+									double rep = rp1 * COR[k, mm];
+									RNP[i, mm] = RNP[i, mm] + rep;
+									RNP[kn, mm] = RNP[kn, mm] - rep;
+
+									// angular forces
+									rep = rp2 * xk[nk - 1][mm];
+									RNP[jn, mm] = RNP[jn, mm] + rep;
+									RNP[kn, mm] = RNP[kn, mm] - rep;
+								}
+
+								// second neighbors via RADIC
+								double ddr = vdrdc * dcfuni[nk - 1] * 2.0 * conk;
+								if (ddr != 0)
+								{
+									int MBEGIN = NABORS[kn];
+									int MEND = NABORS[kn + 1];
+									for (int m = MBEGIN; m<MEND; m++)
+									{
+										int mn = JVCT2B[m];
+										if (mn != kn)
+										{
+											rp = ddr * DWW[m] / RCOR[m];
+											for (int mm=0; mm<3; mm++)
+											{
+												double rep = rp * COR[m, mm];
+												RNP[kn, mm] = RNP[kn, mm] + rep;
+												RNP[mn, mm] = RNP[mn, mm] - rep;
+											}
+										}
+									}
+
+								}
+							}
+						}
+
+						// J side of bond
+						nl = 0;
+						for (int l=LBEGIN; l<LEND; l++)
+						{
+							int ln = JVCT2B[l];
+							if (ln != i)
+							{
+								int kl = 5;
+								if (Atom.AllAtoms[l].atomicNumber == 6)
+								{
+									kl = 0;
+								}
+								else if (Atom.AllAtoms[l].atomicNumber == 1)
+								{
+									kl = 1;
+								}
+								else
+								{
+									Console.WriteLine("Atom types should be either carbon or hydrogen to use REBO potential!");
+									Console.ReadLine();
+									return;
+								}
+
+								double dwr = DWW[l] / RCOR[l];
+								nl = nl + 1;
+
+								// first neighbors
+								double rp1 = vdbdj * (xsjl[nl - 1] + dwr * dexnj[kl]) + dwr * (vdrdj + vdrdc * cfunj[nl - 1]) + vdbdj * dwr * sdaljl;
+								double rp2 = vdbdj * xsil[nl - 1];
+								for (int mm = 0; mm<3; mm++)
+								{
+									double rep = rp1 * COR[l, mm];
+									RNP[jn, mm] = RNP[jn, mm] + rep;
+									RNP[ln, mm] = RNP[ln, mm] - rep;
+
+									// angular forces
+									rep = rp2 * xl[nl-1][mm];
+									RNP[i, mm] = RNP[i, mm] + rep;
+									RNP[ln, mm] = RNP[ln, mm] - rep;
+								}
+
+								// second neighbors via RADIC
+								double ddr = vdrdc * dcfunj[nl - 1] * 2.0 * conl;
+								if (ddr != 0)
+								{
+									int NBEGIN = NABORS[ln];
+									int NEND = NABORS[ln + 1];
+									for (int n=NBEGIN; n<NBEGIN; n++)
+									{
+										int nn = JVCT2B[n];
+										if (nn != ln)
+										{
+											rp = ddr * DWW[n] / RCOR[n];
+											for (int mm=0; mm<3; mm++)
+											{
+												double rep = rp * COR[n, mm];
+												RNP[ln, mm] = RNP[ln, mm] + rep;
+												RNP[nn, mm] = RNP[nn, mm] - rep;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+
+
+			return;
+		}
+
+		private void bcuint(int kl, int ki, double xx1, double xx2, int nh, int nc, double ansy, double ansy1, double ansy2)
+		{
+			ansy = 0;
+			ansy1 = 0;
+			ansy2 = 0;
+
+			for (int j = 0; j < 16; j++ )
+			{
+				double x = CLM[ki, nh, nc, j] * (Math.Pow(xx1, IN2[j, 0])) * (Math.Pow(xx2, IN2[j, 1]));
+				ansy = ansy + x;
+				ansy1 = ansy1 + x * IN2[j, 0] / xx1;
+				ansy2 = ansy2 + x * IN2[j, 1] / xx2;
+			}
+
+			return;
+		}
+
+		private void radic(int ki, int kj, double xnt1, double xnt2, double conjug, double rad, double drdl, double drdm, double drdn)
+		{
+
+			int L = (int)xnt1;
+			int M = (int)xnt2;
+			int N = (int)conjug;
+			rad = 0;
+			drdl = 0;
+			drdm = 0;
+			drdn = 0;
+			int kikj = ki + kj;
+
+			if (L > 4)
+			{
+				L = 4;
+				xnt1 = 4.0;
+			}
+
+			if (M > 4)
+			{
+				M = 4;
+				xnt2 = 4.0;
+			}
+
+			if (N > 9)
+			{
+				N = 9;
+				conjug = 9.0;
+			}
+
+			for (int j = 0; j < 64; j++ )
+			{
+				double x = CLMN[kikj, L - 1, M - 1, N - 1, j] * (Math.Pow(xnt1, IN3[j, 0])) * (Math.Pow(xnt2, IN3[j, 1])) * (Math.Pow(conjug, IN3[j, 2]));
+				rad = rad + x;
+				drdl = drdl + x * IN3[j, 0] / xnt1;
+				drdm = drdm + x * IN3[j, 1] / xnt2;
+				drdn = drdn + x * IN3[j, 2] / conjug;
+			}
+
+			return;
+		}
+
+		private void tor(double xnt1, double xnt2, double conjug, double ator, double drdl, double drdm, double drdn)
+		{
+
+			ator = 0;
+			drdl = 0;
+			drdm = 0;
+			drdn = 0;
+
+			if ((xnt1<=4) && (xnt2<=4))
+			{
+				int L = (int)xnt1;
+				int M = (int)xnt2;
+				int N = (int)conjug;
+
+				for (int j = 0; j < 64; j++)
+				{
+					double x = TLMN[L-1, M-1, N-1, j] * (Math.Pow(xnt1, IN3[j, 0])) * (Math.Pow(xnt2, IN3[j, 1])) * (Math.Pow(conjug, IN3[j, 2]));
+					ator = ator + x;
+					drdl = drdl + x * IN3[j, 0] / xnt1;
+					drdm = drdm + x * IN3[j, 1] / xnt2;
+					drdn = drdn + x * IN3[j, 2] / conjug;
+				}
+			}
+			return;
 		}
     }
 }
