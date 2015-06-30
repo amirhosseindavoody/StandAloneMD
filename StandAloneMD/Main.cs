@@ -9,15 +9,6 @@ namespace StandAloneMD
 	{
 		public static void Main (string[] args)
 		{
-            Console.WriteLine("Testing REBO potential!!!");
-
-			Potential.myPotential = new REBO();
-
-            Console.WriteLine("Reached end of REBO potential!!!");
-            Console.WriteLine("********************STOP THE PROGRAM NOW*********************");
-            Console.ReadLine();
-
-            Console.ReadLine();
             InputOutput.OpenFiles();
 
             CreateEnvironment.myEnvironment = new CreateEnvironment();
@@ -27,7 +18,8 @@ namespace StandAloneMD
             Potential.myPotential.calculateVerletRadius();
 
             Console.WriteLine("Number of atoms = " + Atom.AllAtoms.Count);
-            Console.ReadLine();
+			//Console.WriteLine("Press enter to continue!");
+			//Console.ReadLine();
 
             float totalTime = 20000.0f * StaticVariables.MDTimestep;
             Stopwatch stopwatch = new Stopwatch();
@@ -37,11 +29,12 @@ namespace StandAloneMD
                 PhysicsEngine.VelocityVerlet();
                 BoundaryCondition.myBoundary.Apply();
                 PhysicsEngine.CalculateEnergy();
-                PairDistributionFunction.calculateAveragePairDistribution();
+                //PairDistributionFunction.calculateAveragePairDistribution();
 
                 StaticVariables.currentTime = StaticVariables.currentTime + StaticVariables.MDTimestep;
                 StaticVariables.iTime++;
                 InputOutput.WritePosition();
+				Console.WriteLine(StaticVariables.iTime);
             }
             
             stopwatch.Stop();

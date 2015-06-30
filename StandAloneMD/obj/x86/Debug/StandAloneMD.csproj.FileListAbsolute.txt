@@ -3,3 +3,8 @@ C:\Users\amirhossein\Documents\GitHub\StandAloneMD\StandAloneMD\bin\Debug\StandA
 C:\Users\amirhossein\Documents\GitHub\StandAloneMD\StandAloneMD\obj\x86\Debug\StandAloneMD.csprojResolveAssemblyReference.cache
 C:\Users\amirhossein\Documents\GitHub\StandAloneMD\StandAloneMD\obj\x86\Debug\StandAloneMD.exe
 C:\Users\amirhossein\Documents\GitHub\StandAloneMD\StandAloneMD\obj\x86\Debug\StandAloneMD.pdb
+C:\Amirhossein\StandAloneMD\StandAloneMD\bin\Debug\StandAloneMD.exe
+C:\Amirhossein\StandAloneMD\StandAloneMD\bin\Debug\StandAloneMD.pdb
+C:\Amirhossein\StandAloneMD\StandAloneMD\obj\x86\Debug\StandAloneMD.exe
+C:\Amirhossein\StandAloneMD\StandAloneMD\obj\x86\Debug\StandAloneMD.pdb
+C:\Amirhossein\StandAloneMD\StandAloneMD\obj\x86\Debug\StandAloneMD.csprojResolveAssemblyReference.cache

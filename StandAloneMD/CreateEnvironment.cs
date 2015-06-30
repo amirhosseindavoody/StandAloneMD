@@ -21,7 +21,7 @@ namespace StandAloneMD
 {
 	public class CreateEnvironment
 	{
-		public int numAtoms = 100;
+		public int numAtoms = 10;
 		public float width;
 		public float height;
 		public float depth;
@@ -68,7 +68,7 @@ namespace StandAloneMD
         public void InitAtoms()
 		{
             //set the values for the initialization of atoms, this will later change to the real box size
-            width = 15.0f;
+            width = 5.0f;
             depth = width;
             height = width;
             volume = width * depth * height;
@@ -118,19 +118,32 @@ namespace StandAloneMD
             }
 			else if ((Potential.currentPotential == Potential.potentialType.REBO))
 			{
-				for (int i = 0; i < numAtoms / 2; i++)
-				{
-					Atom currAtom = new Hydrogen();
-					bool proximityFlag = false;
+				//for (int i = 0; i < numAtoms / 2; i++)
+				//{
+				//	Atom currAtom = new Hydrogen();
+				//	bool proximityFlag = false;
 
-					while (proximityFlag == false)
-					{
-						currAtom.velocity = new float[] { 0.0f, 0.0f, 0.0f };
-						currAtom.position = new float[] { randomFloat(-depth / 2.0f, depth / 2.0f), randomFloat(-width / 2.0f, width / 2.0f), randomFloat(-height / 2.0f, height / 2.0f) };
-						proximityFlag = checkProximity(currAtom);
-					}
-				}
-				for (int i = numAtoms / 2; i < numAtoms; i++)
+				//	while (proximityFlag == false)
+				//	{
+				//		currAtom.velocity = new float[] { 0.0f, 0.0f, 0.0f };
+				//		currAtom.position = new float[] { randomFloat(-depth / 2.0f, depth / 2.0f), randomFloat(-width / 2.0f, width / 2.0f), randomFloat(-height / 2.0f, height / 2.0f) };
+				//		proximityFlag = checkProximity(currAtom);
+				//	}
+				//}
+				//for (int i = numAtoms / 2; i < numAtoms; i++)
+				//{
+				//	Atom currAtom = new Carbon();
+				//	bool proximityFlag = false;
+
+				//	while (proximityFlag == false)
+				//	{
+				//		currAtom.velocity = new float[] { 0.0f, 0.0f, 0.0f };
+				//		currAtom.position = new float[] { randomFloat(-depth / 2.0f, depth / 2.0f), randomFloat(-width / 2.0f, width / 2.0f), randomFloat(-height / 2.0f, height / 2.0f) };
+				//		proximityFlag = checkProximity(currAtom);
+				//	}
+				//}
+
+				for (int i = 0; i < numAtoms; i++)
 				{
 					Atom currAtom = new Carbon();
 					bool proximityFlag = false;
@@ -145,7 +158,7 @@ namespace StandAloneMD
 			}
 
             //now, set the values for the real box size which will be used to reflect atoms from walls.
-            width = 15.0f;
+            width = 10.0f;
             depth = width;
             height = width;
             volume = width * depth * height;
@@ -185,7 +198,8 @@ namespace StandAloneMD
             bool proximityFlag = true;
             for (int i = 0; i < Atom.AllAtoms.Count - 1; i++)
             {
-                float minDistance = 2.35f;
+                //float minDistance = 2.35f;
+				float minDistance = 1.0f;
                 Atom otherAtom = Atom.AllAtoms[i];
                 float[] deltaR = BoundaryCondition.myBoundary.deltaPosition(currAtom, otherAtom);
                 float distanceSqr = deltaR[0] * deltaR[0] + deltaR[1] * deltaR[1] + deltaR[2] * deltaR[2];

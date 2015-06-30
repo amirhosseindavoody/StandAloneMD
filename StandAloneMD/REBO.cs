@@ -40,7 +40,9 @@ namespace StandAloneMD
 
         public override void preCompute()
         {
-            
+			setParameters();
+			mtable();
+			neighborListFlag = true;
         }
 
         //the function returns the force on the atom given the list of the atoms that are within range of it
@@ -58,9 +60,24 @@ namespace StandAloneMD
         }
 
         //the function returns the force on the atom given the list of all the atoms in the simulation
-        public override void getForce(Atom firstAtom, Atom secondAtom)
+		public override void getForce(Atom firstAtom, Atom secondAtom)
         {
-            
+			caguts();
+			pibond();
+			for (int i = 0; i < Atom.AllAtoms.Count; i++)
+			{
+				Atom currAtom = Atom.AllAtoms[i];
+				for (int j = 0; j < 3; j++)
+				{
+					if (double.IsNaN(RNP[i, j]))
+					{
+						Console.WriteLine("Calculated force is NaN!!!");
+						Console.ReadLine();
+
+					}
+					currAtom.accelerationNew[j] = (float)(RNP[i, j] * 1.0e15) / currAtom.massamu;
+				}
+			}
         }
 
         //the function returns the force on the atom given the list of all the atoms in the simulation
@@ -71,6 +88,7 @@ namespace StandAloneMD
 			
         }
 
+		// the function calculates the verlet radius that is used to make neighbor list
         public override void calculateVerletRadius()
         {
             
@@ -82,7 +100,7 @@ namespace StandAloneMD
 			neighborListFlag = true;
         }
 
-        private void setParameters()
+        private void setParameters() //Set the potential coefficients and parameters for the potentials
         {
             string line;
 
@@ -586,7 +604,7 @@ namespace StandAloneMD
 			}
         }
 
-		private void mtable()
+		private void mtable() //Creates tables of the potentials VA and VR from the Brenner paper
 		{
 			DDTAB = new double[4, 4];
 			Array.Clear(DDTAB, 0, 16);
@@ -713,8 +731,7 @@ namespace StandAloneMD
 			}
 		}
 
-
-		public void caguts() // This function calculates the neighbor list and the pair potentials
+		public void caguts() // Finds forces on atoms from pair potentials.
 		{
 			// calculate two-body forces and neighbor list for hydrocarbons
 			double[] RR = new double[3];
@@ -930,9 +947,6 @@ namespace StandAloneMD
 					Console.ReadLine();
 				}
 			}
-
-			pibond();
-
 		}
 
 		private void pibond() // This function calculates the forces due to pi-bonds between atoms
@@ -947,8 +961,8 @@ namespace StandAloneMD
 				int JBEGIN = NABORS[i];
 				int JEND = NABORS[i + 1];
 
+				XHC[i, 0] = 1;
 				XHC[i, 1] = 1;
-				XHC[i, 2] = 1;
 				for (int j = JBEGIN; j < JEND; j++ )
 				{
 					int JN = JVCT2B[j];
@@ -998,7 +1012,7 @@ namespace StandAloneMD
 					return;
 				}
 
-				for (int j=JBEGIN; j<(JEND+1); j++)
+				for (int j=JBEGIN; j<(JEND); j++)
 				{
 					int jn = JVCT2B[j];
 					if (i < jn)
@@ -1012,11 +1026,11 @@ namespace StandAloneMD
 						double RSQIJ = SIJ * SIJ;
 
 						int kj = 5;
-						if (Atom.AllAtoms[j].atomicNumber == 6)
+						if (Atom.AllAtoms[jn].atomicNumber == 6)
 						{
 							kj = 0;
 						}
-						else if (Atom.AllAtoms[j].atomicNumber == 1)
+						else if (Atom.AllAtoms[jn].atomicNumber == 1)
 						{
 							kj = 1;
 						}
@@ -1064,11 +1078,11 @@ namespace StandAloneMD
 								int KN = JVCT2B[k];
 								
 								int kk = 5;
-								if (Atom.AllAtoms[k].atomicNumber == 6)
+								if (Atom.AllAtoms[KN].atomicNumber == 6)
 								{
 									kk = 0;
 								}
-								else if (Atom.AllAtoms[k].atomicNumber == 1)
+								else if (Atom.AllAtoms[KN].atomicNumber == 1)
 								{
 									kk = 1;
 								}
@@ -1104,7 +1118,7 @@ namespace StandAloneMD
 
 								if (ki == 0)
 								{
-									int ig = IGC[(int)(-costh * 12.0) + 13] - 1;
+									int ig = IGC[(int)(-costh * 12.0) + 13 - 1] - 1;
 									if (ig != 3)
 									{
 										gangle = SPGC[0, ig] + SPGC[1, ig] * costh;
@@ -1247,11 +1261,11 @@ namespace StandAloneMD
 							{
 
 								int kl = 5;
-								if (Atom.AllAtoms[l].atomicNumber == 6)
+								if (Atom.AllAtoms[ln].atomicNumber == 6)
 								{
 									kl = 0;
 								}
-								else if (Atom.AllAtoms[l].atomicNumber == 1)
+								else if (Atom.AllAtoms[ln].atomicNumber == 1)
 								{
 									kl = 1;
 								}
@@ -1286,7 +1300,7 @@ namespace StandAloneMD
 
 								if (kj == 0)
 								{
-									int ig = IGC[(int)(-costh * 12.0) + 13] - 1;
+									int ig = IGC[(int)(-costh * 12.0) + 13 - 1] - 1;
 									if (ig != 3)
 									{
 										gangle = SPGC[0, ig] + SPGC[1, ig] * costh;
@@ -1357,12 +1371,12 @@ namespace StandAloneMD
 										else
 										{
 											double px = Math.PI * (xx - 2.0);
-											cfunj[nk - 1] = (1.0 + Math.Cos(px)) / 2.0;
-											dcfunj[nk - 1] = -fc * Math.Sin(px) * Math.PI / 2.0;
+											cfunj[nl - 1] = (1.0 + Math.Cos(px)) / 2.0;
+											dcfunj[nl - 1] = -fc * Math.Sin(px) * Math.PI / 2.0;
 										}
 									}
 								}
-								conl = conl + fc * cfunj[nk - 1];
+								conl = conl + fc * cfunj[nl - 1];
 
 								double exx = 0;
 								if (XDB[kj, ki, kl] != 0)
@@ -1440,8 +1454,8 @@ namespace StandAloneMD
 						double dradj = 0;
 						double drdc = 0;
 						double conjug = 1.0 + (conk * conk) + (conl * conl);
-						double xnt1 = xni[0] + xni[2] - 1.0;
-						double xnt2 = xnj[0] + xnj[2] - 1.0;
+						double xnt1 = xni[0] + xni[1] - 1.0;
+						double xnt2 = xnj[0] + xnj[1] - 1.0;
 						
 						double rad=0;
 						radic(ki, kj, xnt1, xnt2, conjug, rad, dradi, dradj, drdc);
@@ -1626,11 +1640,11 @@ namespace StandAloneMD
 							{
 								int kn = JVCT2B[k];
 								int kk = 5;
-								if (Atom.AllAtoms[k].atomicNumber == 6)
+								if (Atom.AllAtoms[kn].atomicNumber == 6)
 								{
 									kk = 0;
 								}
-								else if (Atom.AllAtoms[k].atomicNumber == 1)
+								else if (Atom.AllAtoms[kn].atomicNumber == 1)
 								{
 									kk = 1;
 								}
@@ -1692,11 +1706,11 @@ namespace StandAloneMD
 							if (ln != i)
 							{
 								int kl = 5;
-								if (Atom.AllAtoms[l].atomicNumber == 6)
+								if (Atom.AllAtoms[ln].atomicNumber == 6)
 								{
 									kl = 0;
 								}
-								else if (Atom.AllAtoms[l].atomicNumber == 1)
+								else if (Atom.AllAtoms[ln].atomicNumber == 1)
 								{
 									kl = 1;
 								}
@@ -1757,7 +1771,7 @@ namespace StandAloneMD
 			return;
 		}
 
-		private void bcuint(int kl, int ki, double xx1, double xx2, int nh, int nc, double ansy, double ansy1, double ansy2)
+		private void bcuint(int kl, int ki, double xx1, double xx2, int nh, int nc, double ansy, double ansy1, double ansy2) //Bicubic interpolation of CLM; also returns derivatives. 
 		{
 			ansy = 0;
 			ansy1 = 0;
@@ -1774,7 +1788,7 @@ namespace StandAloneMD
 			return;
 		}
 
-		private void radic(int ki, int kj, double xnt1, double xnt2, double conjug, double rad, double drdl, double drdm, double drdn)
+		private void radic(int ki, int kj, double xnt1, double xnt2, double conjug, double rad, double drdl, double drdm, double drdn) //Tricubic interpolation of CLMN 
 		{
 
 			int L = (int)xnt1;
@@ -1816,7 +1830,7 @@ namespace StandAloneMD
 			return;
 		}
 
-		private void tor(double xnt1, double xnt2, double conjug, double ator, double drdl, double drdm, double drdn)
+		private void tor(double xnt1, double xnt2, double conjug, double ator, double drdl, double drdm, double drdn) //Torsional interaction TLMN tricubic interpolation
 		{
 
 			ator = 0;

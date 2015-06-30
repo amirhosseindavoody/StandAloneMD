@@ -26,15 +26,24 @@ namespace StandAloneMD
              
             
             // update the acceleration of all atoms
-            for (int i = 0; i < Atom.AllAtoms.Count; i++)
-            {
-                Atom firstAtom = Atom.AllAtoms[i];
-                for (int j = 0; j < firstAtom.neighborList.Count; j++)
-                {
-                    Atom secondAtom = firstAtom.neighborList[j];
-                    Potential.myPotential.getForce(firstAtom, secondAtom);
-                }
-            }
+			if ((Potential.currentPotential == Potential.potentialType.REBO))
+			{
+				Atom firstAtom = Atom.AllAtoms[0];
+				Atom secondAtom = Atom.AllAtoms[1];
+				Potential.myPotential.getForce(firstAtom,secondAtom);
+			}
+			else
+			{
+				for (int i = 0; i < Atom.AllAtoms.Count; i++)
+				{
+					Atom firstAtom = Atom.AllAtoms[i];
+					for (int j = 0; j < firstAtom.neighborList.Count; j++)
+					{
+						Atom secondAtom = firstAtom.neighborList[j];
+						Potential.myPotential.getForce(firstAtom, secondAtom);
+					}
+				}
+			}
 
             // update the velocity of all atoms
             for (int i = 0; i < Atom.AllAtoms.Count; i++)
