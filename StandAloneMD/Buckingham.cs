@@ -8,7 +8,7 @@ namespace StandAloneMD
     class Buckingham : Potential
     {
         //Cutoff distance for calculating Buckingham force. Beyond this distance the force is taken to be zero.
-        private float cutoff = 100.0f; //[Angstrom]
+        private float cutoff = 10.0f; //[Angstrom]
         private float cutoffSqr;
 
         //Cutoff distance for using the spline interpolation function. Beyond this distance the force smoothed to zero.
@@ -38,45 +38,46 @@ namespace StandAloneMD
             int nR = (int)(cutoff / dR) + 1;
             preBuckinghamAcceleration = new float[Atom.templateAtoms.Count, Atom.templateAtoms.Count, nR];
             PreBuckinghamPotential = new float[Atom.templateAtoms.Count, Atom.templateAtoms.Count, nR];
-            /*
-            //precompute sigma and acceleration coefficient for the Buckingham potential
-            for (int i = 0; i < Atom.templateAtoms.Count; i++)
-            {
-                Atom firstAtom = Atom.templateAtoms[i];
-                for (int j = 0; j < Atom.templateAtoms.Count; j++)
-                {
-                    Atom secondAtom = Atom.templateAtoms[j];
+			
+			//precompute sigma and acceleration coefficient for the Buckingham potential
+			for (int i = 0; i < Atom.templateAtoms.Count; i++)
+			{
+				Atom firstAtom = Atom.templateAtoms[i];
+				for (int j = 0; j < Atom.templateAtoms.Count; j++)
+				{
+					Atom secondAtom = Atom.templateAtoms[j];
 
-                    float currentA = (float)Math.Sqrt(firstAtom.buck_A * secondAtom.buck_A);
-                    coeff_A[firstAtom.atomID, secondAtom.atomID] = currentA;
+					float currentA = (float)Math.Sqrt(firstAtom.buck_A * secondAtom.buck_A);
+					coeff_A[firstAtom.atomID, secondAtom.atomID] = currentA;
 
-                    float currentB = (float)Math.Sqrt(firstAtom.buck_B * secondAtom.buck_B);
-                    coeff_B[firstAtom.atomID, secondAtom.atomID] = currentB;
+					float currentB = (float)Math.Sqrt(firstAtom.buck_B * secondAtom.buck_B);
+					coeff_B[firstAtom.atomID, secondAtom.atomID] = currentB;
 
-                    float currentC = (float)Math.Sqrt(firstAtom.buck_C * secondAtom.buck_C);
-                    coeff_C[firstAtom.atomID, secondAtom.atomID] = currentC;
+					float currentC = (float)Math.Sqrt(firstAtom.buck_C * secondAtom.buck_C);
+					coeff_C[firstAtom.atomID, secondAtom.atomID] = currentC;
 
-                    float currentD = (float)Math.Sqrt(firstAtom.buck_D * secondAtom.buck_D);
-                    coeff_D[firstAtom.atomID, secondAtom.atomID] = currentD;
+					float currentD = (float)Math.Sqrt(firstAtom.buck_D * secondAtom.buck_D);
+					coeff_D[firstAtom.atomID, secondAtom.atomID] = currentD;
 
-                    for (int iR = 0; iR < nR; iR++)
-                    {
-                        float distance = (float)iR * dR;
-                        if (distance < 1.455f)
-                            distance = 1.455f;
-                        preBuckinghamAcceleration[firstAtom.atomID,secondAtom.atomID,iR] = calcAcceleration(distance,firstAtom,secondAtom);
-                        PreBuckinghamPotential[firstAtom.atomID, secondAtom.atomID, iR] = calcPotential(distance, firstAtom, secondAtom);
-                    }
-                }
-            }
-            InputOutput.WritePotential(PreBuckinghamPotential);
-            InputOutput.WriteForce(preBuckinghamAcceleration);
-             */
+					for (int iR = 0; iR < nR; iR++)
+					{
+						float distance = (float)iR * dR;
+						if (distance < 1.455f)
+							distance = 1.455f;
+						preBuckinghamAcceleration[firstAtom.atomID,secondAtom.atomID,iR] = calcAcceleration(distance,firstAtom,secondAtom);
+						PreBuckinghamPotential[firstAtom.atomID, secondAtom.atomID, iR] = calcPotential(distance, firstAtom, secondAtom);
+					}
+				}
+			}
+			InputOutput.WritePotential(PreBuckinghamPotential);
+			InputOutput.WriteForce(preBuckinghamAcceleration);
+			Console.WriteLine("Potential and Forces saved!");
+			
 
+			/*
             InputOutput.ReadPotential(PreBuckinghamPotential);
             InputOutput.ReadForce(preBuckinghamAcceleration);
-
-            Console.WriteLine("Potential and Forces saved!");
+			*/
         }
 
         //the function returns the LennarJones force on the atom given the list of the atoms that are within range of it

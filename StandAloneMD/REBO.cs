@@ -64,20 +64,20 @@ namespace StandAloneMD
         {
 			caguts();
 			pibond();
-			for (int i = 0; i < Atom.AllAtoms.Count; i++)
-			{
-				Atom currAtom = Atom.AllAtoms[i];
-				for (int j = 0; j < 3; j++)
-				{
-					if (double.IsNaN(RNP[i, j]))
-					{
-						Console.WriteLine("Calculated force is NaN!!!");
-						Console.ReadLine();
+			//for (int i = 0; i < Atom.AllAtoms.Count; i++)
+			//{
+			//	Atom currAtom = Atom.AllAtoms[i];
+			//	for (int j = 0; j < 3; j++)
+			//	{
+			//		if (double.IsNaN(RNP[i, j]))
+			//		{
+			//			Console.WriteLine("Calculated force is NaN!!!");
+			//			Console.ReadLine();
 
-					}
-					currAtom.accelerationNew[j] = (float)(RNP[i, j] * 1.0e15) / currAtom.massamu;
-				}
-			}
+			//		}
+			//		currAtom.accelerationNew[j] = (float)(RNP[i, j] * 1.0e15) / currAtom.massamu;
+			//	}
+			//}
         }
 
         //the function returns the force on the atom given the list of all the atoms in the simulation
@@ -1818,6 +1818,24 @@ namespace StandAloneMD
 				conjug = 9.0;
 			}
 
+			// debug purposes
+			// WARNING: this section is not part of the original code and has been added to enable the code to run without IndexOutOfRange error. Serious debuging is needed
+			if (L < 1)
+			{
+				L = 1;
+			}
+
+			if (M < 1)
+			{
+				M = 1;
+			}
+
+			if (N < 1)
+			{
+				N = 1;
+			}
+			// end of debug code
+
 			for (int j = 0; j < 64; j++ )
 			{
 				double x = CLMN[kikj, L - 1, M - 1, N - 1, j] * (Math.Pow(xnt1, IN3[j, 0])) * (Math.Pow(xnt2, IN3[j, 1])) * (Math.Pow(conjug, IN3[j, 2]));
@@ -1843,6 +1861,29 @@ namespace StandAloneMD
 				int L = (int)xnt1;
 				int M = (int)xnt2;
 				int N = (int)conjug;
+
+				// debug purposes
+				// WARNING: this section is not part of the original code and has been added to enable the code to run without IndexOutOfRange error. Serious debuging is needed
+				if (L < 1)
+				{
+					L = 1;
+				}
+
+				if (M < 1)
+				{
+					M = 1;
+				}
+
+				if (N < 1)
+				{
+					N = 1;
+				}
+
+				if (N > 10)
+				{
+					N = 10;
+				}
+				// end of debug code
 
 				for (int j = 0; j < 64; j++)
 				{

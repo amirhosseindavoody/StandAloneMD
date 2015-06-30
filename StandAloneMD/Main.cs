@@ -21,7 +21,7 @@ namespace StandAloneMD
 			//Console.WriteLine("Press enter to continue!");
 			//Console.ReadLine();
 
-            float totalTime = 20000.0f * StaticVariables.MDTimestep;
+            float totalTime = 20004.0f * StaticVariables.MDTimestep;
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             while (StaticVariables.currentTime < totalTime)
@@ -34,7 +34,6 @@ namespace StandAloneMD
                 StaticVariables.currentTime = StaticVariables.currentTime + StaticVariables.MDTimestep;
                 StaticVariables.iTime++;
                 InputOutput.WritePosition();
-				Console.WriteLine(StaticVariables.iTime);
             }
             
             stopwatch.Stop();

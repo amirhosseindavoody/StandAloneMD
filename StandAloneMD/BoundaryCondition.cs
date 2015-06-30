@@ -8,7 +8,7 @@ namespace StandAloneMD
     abstract class BoundaryCondition
     {
         //this varaible keeps track of the current potential that is being used. (Note: only Lennard-Jones is currently implemented)
-        public static BoundaryCondition myBoundary = new PeriodicBoundary();
+        public static BoundaryCondition myBoundary = new ReflectingBoundary();
 
         
         //reflect the atoms from the walls
