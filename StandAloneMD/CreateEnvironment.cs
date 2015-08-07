@@ -124,36 +124,21 @@ namespace StandAloneMD
             }
 			else if ((Potential.currentPotential == Potential.potentialType.REBO))
 			{
-				//for (int i = 0; i < numAtoms / 2; i++)
-				//{
-				//	Atom currAtom = new Hydrogen();
-				//	bool proximityFlag = false;
+				for (int i = 0; i < numAtoms / 2; i++)
+				{
+					Atom currAtom = new Hydrogen();
+					bool proximityFlag = false;
 
-				//	while (proximityFlag == false)
-				//	{
-				//		float maxInitialVelocity = 2.0f * (float)Math.Sqrt(3.0f * StaticVariables.kB * StaticVariables.desiredTemperature / (currAtom.massamu * StaticVariables.amuToKg * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters));
-				//		currAtom.velocity = new float[] { randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity), randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity), randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity) };
-				//
-				//		currAtom.position = new float[] { randomFloat(-depth / 2.0f, depth / 2.0f), randomFloat(-width / 2.0f, width / 2.0f), randomFloat(-height / 2.0f, height / 2.0f) };
-				//		proximityFlag = checkProximity(currAtom);
-				//	}
-				//}
-				//for (int i = numAtoms / 2; i < numAtoms; i++)
-				//{
-				//	Atom currAtom = new Carbon();
-				//	bool proximityFlag = false;
+					while (proximityFlag == false)
+					{
+						float maxInitialVelocity = 2.0f * (float)Math.Sqrt(3.0f * StaticVariables.kB * StaticVariables.desiredTemperature / (currAtom.massamu * StaticVariables.amuToKg * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters));
+						currAtom.velocity = new float[] { randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity), randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity), randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity) };
 
-				//	while (proximityFlag == false)
-				//	{
-				//		float maxInitialVelocity = 2.0f * (float)Math.Sqrt(3.0f * StaticVariables.kB * StaticVariables.desiredTemperature / (currAtom.massamu * StaticVariables.amuToKg * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters));
-				//		currAtom.velocity = new float[] { randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity), randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity), randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity) };
-				//
-				//		currAtom.position = new float[] { randomFloat(-depth / 2.0f, depth / 2.0f), randomFloat(-width / 2.0f, width / 2.0f), randomFloat(-height / 2.0f, height / 2.0f) };
-				//		proximityFlag = checkProximity(currAtom);
-				//	}
-				//}
-
-				for (int i = 0; i < numAtoms; i++)
+						currAtom.position = new float[] { randomFloat(-depth / 2.0f, depth / 2.0f), randomFloat(-width / 2.0f, width / 2.0f), randomFloat(-height / 2.0f, height / 2.0f) };
+						proximityFlag = checkProximity(currAtom);
+					}
+				}
+				for (int i = numAtoms / 2; i < numAtoms; i++)
 				{
 					Atom currAtom = new Carbon();
 					bool proximityFlag = false;
@@ -167,6 +152,21 @@ namespace StandAloneMD
 						proximityFlag = checkProximity(currAtom);
 					}
 				}
+
+				//for (int i = 0; i < numAtoms; i++)
+				//{
+				//	Atom currAtom = new Carbon();
+				//	bool proximityFlag = false;
+
+				//	while (proximityFlag == false)
+				//	{
+				//		float maxInitialVelocity = 2.0f * (float)Math.Sqrt(3.0f * StaticVariables.kB * StaticVariables.desiredTemperature / (currAtom.massamu * StaticVariables.amuToKg * StaticVariables.angstromsToMeters * StaticVariables.angstromsToMeters));
+				//		currAtom.velocity = new float[] { randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity), randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity), randomFloat(-1.0f * maxInitialVelocity, +1.0f * maxInitialVelocity) };
+
+				//		currAtom.position = new float[] { randomFloat(-depth / 2.0f, depth / 2.0f), randomFloat(-width / 2.0f, width / 2.0f), randomFloat(-height / 2.0f, height / 2.0f) };
+				//		proximityFlag = checkProximity(currAtom);
+				//	}
+				//}
 			}
 
             //now, set the values for the real box size which will be used to reflect atoms from walls.

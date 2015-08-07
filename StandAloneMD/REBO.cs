@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Diagnostics;
 
 namespace StandAloneMD
 {
@@ -64,20 +65,21 @@ namespace StandAloneMD
         {
 			caguts();
 			pibond();
-			//for (int i = 0; i < Atom.AllAtoms.Count; i++)
-			//{
-			//	Atom currAtom = Atom.AllAtoms[i];
-			//	for (int j = 0; j < 3; j++)
-			//	{
-			//		if (double.IsNaN(RNP[i, j]))
-			//		{
-			//			Console.WriteLine("Calculated force is NaN!!!");
-			//			Console.ReadLine();
 
-			//		}
-			//		currAtom.accelerationNew[j] = (float)(RNP[i, j] * 1.0e15) / currAtom.massamu;
-			//	}
-			//}
+			for (int i = 0; i < Atom.AllAtoms.Count; i++)
+			{
+				Atom currAtom = Atom.AllAtoms[i];
+				for (int j = 0; j < 3; j++)
+				{
+					if (double.IsNaN(RNP[i, j]))
+					{
+						Console.WriteLine("Calculated force is NaN!!!");
+						Console.ReadLine();
+
+					}
+					currAtom.accelerationNew[j] = (float)(RNP[i, j] * 1.0e15) / currAtom.massamu;
+				}
+			}
         }
 
         //the function returns the force on the atom given the list of all the atoms in the simulation
@@ -736,12 +738,18 @@ namespace StandAloneMD
 			// calculate two-body forces and neighbor list for hydrocarbons
 			double[] RR = new double[3];
 			double[] RI = new double[3];
-			NABORS = new int[Atom.AllAtoms.Count+1];
+			NABORS = new int[Atom.AllAtoms.Count + 1];
 
 			RNP = new double[Atom.AllAtoms.Count, 3];
 			Array.Clear(RNP, 0, Atom.AllAtoms.Count * 3);
 
-
+			{
+				bool flg = checkNaN(RNP);
+				if (flg)
+				{
+					Debugger.Break();
+				}
+			}
 
 			eatom = new double[Atom.AllAtoms.Count];
 			Array.Clear(eatom, 0, eatom.Length);
@@ -752,7 +760,7 @@ namespace StandAloneMD
 				int K = 0;
 				IVCT2B.Clear();
 				JVCT2B.Clear();
-				for (int I = 0; I<Atom.AllAtoms.Count; I++)
+				for (int I = 0; I < Atom.AllAtoms.Count; I++)
 				{
 					NABORS[I] = K;
 					RI[0] = Atom.AllAtoms[I].position[0];
@@ -763,7 +771,7 @@ namespace StandAloneMD
 					{
 						ki = 0;
 					}
-					else if(Atom.AllAtoms[I].atomicNumber == 1)
+					else if (Atom.AllAtoms[I].atomicNumber == 1)
 					{
 						ki = 1;
 					}
@@ -774,7 +782,7 @@ namespace StandAloneMD
 						return;
 					}
 
-					for (int J = 0; J<Atom.AllAtoms.Count; J++)
+					for (int J = 0; J < Atom.AllAtoms.Count; J++)
 					{
 						if (I != J)
 						{
@@ -795,12 +803,12 @@ namespace StandAloneMD
 							}
 							double RLIS = RLIST[ki, kj];
 							double rsq = 0.0;
-							for (int L = 0; L < 3; L++ )
+							for (int L = 0; L < 3; L++)
 							{
 								RR[L] = RI[L] - Atom.AllAtoms[J].position[L];
 								rsq = rsq + RR[L] * RR[L];
 							}
-							
+
 							if (rsq <= RLIS)
 							{
 								K++;
@@ -826,23 +834,23 @@ namespace StandAloneMD
 
 
 			LCHECK = new int[KEND];
-			Array.Clear(LCHECK,0, KEND);
-			COR = new double [KEND, 3];
-			Array.Clear(COR,0, 3*KEND);
-			RCOR = new double [KEND];
-			Array.Clear(RCOR,0, KEND);
-			WW = new double [KEND];
-			Array.Clear(WW,0, KEND);
-			DWW = new double [KEND];
-			Array.Clear(DWW,0, KEND);
-			EXX1 = new double [KEND];
-			Array.Clear(EXX1,0, KEND);
-			DEXX1 = new double [KEND];
-			Array.Clear(DEXX1,0, KEND);
-			double[,] RPP = new double[KEND,3];
-			Array.Clear(RPP,0, 3*KEND);
+			Array.Clear(LCHECK, 0, KEND);
+			COR = new double[KEND, 3];
+			Array.Clear(COR, 0, 3 * KEND);
+			RCOR = new double[KEND];
+			Array.Clear(RCOR, 0, KEND);
+			WW = new double[KEND];
+			Array.Clear(WW, 0, KEND);
+			DWW = new double[KEND];
+			Array.Clear(DWW, 0, KEND);
+			EXX1 = new double[KEND];
+			Array.Clear(EXX1, 0, KEND);
+			DEXX1 = new double[KEND];
+			Array.Clear(DEXX1, 0, KEND);
+			double[,] RPP = new double[KEND, 3];
+			Array.Clear(RPP, 0, 3 * KEND);
 
-			for (int K=0; K<KEND; K++)
+			for (int K = 0; K < KEND; K++)
 			{
 				int I = IVCT2B[K];
 				int J = JVCT2B[K];
@@ -876,17 +884,17 @@ namespace StandAloneMD
 					Console.ReadLine();
 					return;
 				}
-				
-				LCHECK[K]=0;
+
+				LCHECK[K] = 0;
 				double rsq = 0.0;
-				for (int L=0; L<3; L++)
+				for (int L = 0; L < 3; L++)
 				{
 					RR[L] = Atom.AllAtoms[I].position[L] - Atom.AllAtoms[J].position[L];
 					rsq = rsq + RR[L] * RR[L];
-					COR[K,L] = RR[L];
+					COR[K, L] = RR[L];
 				}
-				
-				if (rsq <= RMAX[KI,KJ])
+
+				if (rsq <= RMAX[KI, KJ])
 				{
 
 					if ((KJ <= 1) && (KI <= 1)) LCHECK[K] = 1;
@@ -896,12 +904,12 @@ namespace StandAloneMD
 					double rt = rc / DDTAB[KI, KJ];
 					int it = Math.Min((int)rt, NTAB - 2);
 
-					RCOR[K]=rc;
-					WW[K] = TABFC[KI, KJ, it] + (TABFC[KI,KJ,it+1]-TABFC[KI,KJ,it])*(rt-(double)it+1.0);
+					RCOR[K] = rc;
+					WW[K] = TABFC[KI, KJ, it] + (TABFC[KI, KJ, it + 1] - TABFC[KI, KJ, it]) * (rt - (double)it + 1.0);
 					DWW[K] = TABDFC[KI, KJ, it] + (TABDFC[KI, KJ, it + 1] - TABDFC[KI, KJ, it]) * (rt - (double)it + 1.0);
-					EXX1[K] = ATABLE[KI, KJ, it] + (ATABLE[KI,KJ,it+1]-ATABLE[KI,KJ,it])*(rt-(double)it+1.0);
+					EXX1[K] = ATABLE[KI, KJ, it] + (ATABLE[KI, KJ, it + 1] - ATABLE[KI, KJ, it]) * (rt - (double)it + 1.0);
 					DEXX1[K] = DATABLE[KI, KJ, it] + (DATABLE[KI, KJ, it + 1] - DATABLE[KI, KJ, it]) * (rt - (double)it + 1.0);
-					
+
 					if (I < J)
 					{
 						double vv = RTABLE[KI, KJ, it] + (RTABLE[KI, KJ, it + 1] - RTABLE[KI, KJ, it]) * (rt - (double)it + 1.0); // this is the potential energy between atom pair I and J
@@ -910,7 +918,7 @@ namespace StandAloneMD
 						eatom[I] = eatom[I] + vv / 2.0;
 						eatom[J] = eatom[J] + vv / 2.0;
 
-						for (int L=0; L<3; L++)
+						for (int L = 0; L < 3; L++)
 						{
 							RPP[K, L] = rp * RR[L];
 						}
@@ -918,7 +926,7 @@ namespace StandAloneMD
 				}
 			}
 
-			for (int K=0;K<KEND; K++)
+			for (int K = 0; K < KEND; K++)
 			{
 				if (LCHECK[K] != 0)
 				{
@@ -926,7 +934,7 @@ namespace StandAloneMD
 					int J = JVCT2B[K];
 					if (I < J)
 					{
-						for (int L=0; L<3; L++)
+						for (int L = 0; L < 3; L++)
 						{
 							RNP[I, L] = RNP[I, L] + RPP[K, L];
 							RNP[J, L] = RNP[J, L] + RPP[K, L];
@@ -935,11 +943,19 @@ namespace StandAloneMD
 				}
 			}
 
+			{
+				bool flg = checkNaN(RNP);
+				if (flg)
+				{
+					Debugger.Break();
+				}
+			}
+
 			// add a check to see if the atoms are carbohydrates or si-germanium and perform the corresponding routines
 			// call pibond for carbohydrates
 			// call sili_germ for silicon germanium atoms.
 
-			for (int i = 0; i < Atom.AllAtoms.Count; i++ )
+			for (int i = 0; i < Atom.AllAtoms.Count; i++)
 			{
 				if ((Atom.AllAtoms[i].atomicNumber != 1) && (Atom.AllAtoms[i].atomicNumber != 6))
 				{
@@ -1018,7 +1034,7 @@ namespace StandAloneMD
 					if (i < jn)
 					{
 						double[] CJ = new double[3];
-						for (int mm=0; mm<3; mm++)
+						for (int mm = 0; mm < 3; mm++)
 						{
 							CJ[mm] = COR[j, mm];
 						}
@@ -1065,7 +1081,7 @@ namespace StandAloneMD
 						double qi = xni[0] + xni[1] - 2.0e0;
 						double sdalik = 0;
 
-						for (int k=JBEGIN; k<JEND; k++)
+						for (int k = JBEGIN; k < JEND; k++)
 						{
 							double ali = 0;
 							double dali = 0;
@@ -1076,7 +1092,7 @@ namespace StandAloneMD
 							if ((k != j))
 							{
 								int KN = JVCT2B[k];
-								
+
 								int kk = 5;
 								if (Atom.AllAtoms[KN].atomicNumber == 6)
 								{
@@ -1099,7 +1115,7 @@ namespace StandAloneMD
 								double rsq2 = 0;
 
 								double[] tempArray = new double[3];
-								for (int mm=0; mm<3; mm++)
+								for (int mm = 0; mm < 3; mm++)
 								{
 									tempArray[mm] = COR[k, mm] - CJ[mm];
 									rsq2 = rsq2 + tempArray[mm] * tempArray[mm];
@@ -1114,7 +1130,7 @@ namespace StandAloneMD
 								cosk.Add(costh);
 								sink.Add(Math.Sqrt(1.0 - costh * costh));
 								if (Math.Acos(costh) > Math.PI) sink[nk - 1] = -sink[nk - 1];
-								
+
 
 								if (ki == 0)
 								{
@@ -1123,7 +1139,7 @@ namespace StandAloneMD
 									{
 										gangle = SPGC[0, ig] + SPGC[1, ig] * costh;
 										dgdthet = SPGC[1, ig];
-										for (int jj = 2; jj<6; jj++)
+										for (int jj = 2; jj < 6; jj++)
 										{
 											gangle = gangle + SPGC[jj, ig] * (Math.Pow(costh, jj));
 											dgdthet = dgdthet + SPGC[jj, ig] * ((double)jj) * Math.Pow(costh, jj - 1);
@@ -1148,7 +1164,7 @@ namespace StandAloneMD
 										int ig1 = ig + 1;
 										double gangle1 = SPGC[0, ig1] + SPGC[1, ig1] * costh;
 										double dgdthet1 = SPGC[1, ig1];
-										for (int jj=2; jj<6; jj++)
+										for (int jj = 2; jj < 6; jj++)
 										{
 											gangle = gangle + SPGC[jj, ig] * Math.Pow(costh, jj);
 											dgdthet = dgdthet + SPGC[jj, ig] * ((double)jj) * Math.Pow(costh, jj - 1);
@@ -1162,10 +1178,10 @@ namespace StandAloneMD
 								}
 								else
 								{
-									int ig = IGH[(int)(-costh * 12.0) + 13]-1;
+									int ig = IGH[(int)(-costh * 12.0) + 13 - 1] - 1;
 									gangle = SPGH[0, ig] + SPGH[1, ig] * costh;
 									dgdthet = SPGH[1, ig];
-									for (int jj=2; jj<6; jj++)
+									for (int jj = 2; jj < 6; jj++)
 									{
 										gangle = gangle + SPGH[jj, ig] * Math.Pow(costh, jj);
 										dgdthet = dgdthet + SPGH[jj, ig] * (double)(jj) * Math.Pow(costh, jj - 1);
@@ -1182,14 +1198,14 @@ namespace StandAloneMD
 									double xx = XHC[KN, 0] + XHC[KN, 1] - fc - 2.0;
 									if (xx < 3.0)
 									{
-										if(xx <= 2.0)
+										if (xx <= 2.0)
 										{
 											cfuni[nk - 1] = 1.0;
 										}
 										else
 										{
 											double px = Math.PI * (xx - 2.0);
-											cfuni[nk-1] = (1.0+Math.Cos(px))/2.0;
+											cfuni[nk - 1] = (1.0 + Math.Cos(px)) / 2.0;
 											dcfuni[nk - 1] = -fc * Math.Sin(px) * Math.PI / 2.0;
 										}
 									}
@@ -1197,7 +1213,7 @@ namespace StandAloneMD
 								conk = conk + fc * cfuni[nk - 1];
 
 								double exx = 0;
-								if (XDB[ki,kj,kk] != 0)
+								if (XDB[ki, kj, kk] != 0)
 								{
 									exx = REG[ki, kj, kk] * Math.Exp(XDB[ki, kj, kk] * (SIJ - s3));
 								}
@@ -1230,19 +1246,19 @@ namespace StandAloneMD
 						List<double> sinl = new List<double>();
 						List<double> cfunj = new List<double>();
 						List<double> dcfunj = new List<double>();
-						
+
 						List<double> dctil = new List<double>();
 						List<double> dctji = new List<double>();
 						List<double> dctjl = new List<double>();
 						List<double> xsjl = new List<double>();
 						List<double> xsil = new List<double>();
-						
+
 
 						double xsji = 0;
 						double ssuml = 0;
 						double conl = 0;
 						int LBEGIN = NABORS[jn];
-						int LEND = NABORS[jn+1];
+						int LEND = NABORS[jn + 1];
 						double[] xnj = new double[2] { XHC[jn, 0], XHC[jn, 1] };
 						xnj[ki] = xnj[ki] - WW[j];
 						double qj = xnj[0] + xnj[1] - 2.0e0;
@@ -1313,7 +1329,7 @@ namespace StandAloneMD
 									}
 									else
 									{
-										alj= 0;
+										alj = 0;
 										dalj = 0;
 										if (qj < XQM)
 										{
@@ -1344,7 +1360,7 @@ namespace StandAloneMD
 								}
 								else
 								{
-									int ig = IGH[(int)(-costh * 12.0) + 13] - 1;
+									int ig = IGH[(int)(-costh * 12.0) + 13 - 1] - 1;
 									gangle = SPGH[0, ig] + SPGH[1, ig] * costh;
 									dgdthet = SPGH[1, ig];
 									for (int jj = 2; jj < 6; jj++)
@@ -1410,15 +1426,15 @@ namespace StandAloneMD
 
 						if (ki == 0)
 						{
-							int nh = (int)(xni[1] + Math.Pow(1,-12));
+							int nh = (int)(xni[1] + Math.Pow(1, -12));
 							int nc = (int)(xni[0] + Math.Pow(1, -12));
 							if ((Math.Abs((double)nh - xni[1]) > Math.Pow(1, -8)) || (Math.Abs((double)nc - xni[0]) > Math.Pow(1, -8)))
 							{
-								bcuint(ki, kj, xni[1], xni[0], nh-1, nc-1, exnij, dexni[1], dexni[0]);
+								bcuint(ki, kj, xni[1], xni[0], nh - 1, nc - 1, exnij, dexni[1], dexni[0]);
 							}
 							else
 							{
-								exnij = XH[kj, nh-1, nc-1];
+								exnij = XH[kj, nh - 1, nc - 1];
 								dexni[1] = XH1[kj, nh - 1, nc - 1];
 								dexni[0] = XH2[kj, nh - 1, nc - 1];
 							}
@@ -1445,7 +1461,7 @@ namespace StandAloneMD
 
 						double dij = 1.0 + exnij + ssumk;
 						double bij = 1.0 / Math.Sqrt(dij);
-						double dji = 1.0 + exnji+ ssuml;
+						double dji = 1.0 + exnji + ssuml;
 						double bji = 1.0 / Math.Sqrt(dji);
 						double dbdzi = -0.5 * bij / dij;
 						double dbdzj = -0.5 * bji / dji;
@@ -1456,14 +1472,14 @@ namespace StandAloneMD
 						double conjug = 1.0 + (conk * conk) + (conl * conl);
 						double xnt1 = xni[0] + xni[1] - 1.0;
 						double xnt2 = xnj[0] + xnj[1] - 1.0;
-						
-						double rad=0;
+
+						double rad = 0;
 						radic(ki, kj, xnt1, xnt2, conjug, rad, dradi, dradj, drdc);
 
 						double btot = bji + bij + rad;
 
 						//dihedral terms
-						if (kikj+2 == NDIHED)
+						if (kikj + 2 == NDIHED)
 						{
 
 							double btor = 0;
@@ -1474,17 +1490,17 @@ namespace StandAloneMD
 							double datorc = 0;
 							tor(xnt1, xnt2, conjug, ator, datori, datorj, datorc);
 
-							if (Math.Abs(ator) > Math.Pow(1.0,-8))
+							if (Math.Abs(ator) > Math.Pow(1.0, -8))
 							{
 								nk = 0;
-								for (int k=JBEGIN; k<JEND; k++)
+								for (int k = JBEGIN; k < JEND; k++)
 								{
 									if (k != j)
 									{
 										nk = nk + 1;
-										if (Math.Abs(sink[nk-1]) >= 0.1)
+										if (Math.Abs(sink[nk - 1]) >= 0.1)
 										{
-											double sink2 = sink[nk-1] * sink[nk-1];
+											double sink2 = sink[nk - 1] * sink[nk - 1];
 											int kn = JVCT2B[k];
 
 											double[] ck = new double[3] { COR[k, 0], COR[k, 1], COR[k, 2] };
@@ -1492,13 +1508,13 @@ namespace StandAloneMD
 
 											double fck = 0;
 											double dfck = 0;
-											if(Atom.AllAtoms[kn].atomicNumber == 1)
+											if (Atom.AllAtoms[kn].atomicNumber == 1)
 											{
 												fck = 1.0;
 												dfck = 0;
 												if (rck < 1.6)
 												{
-													if(rck >= 1.3)
+													if (rck >= 1.3)
 													{
 														double dtemp = PIDT * (rck - 1.3);
 														fck = (1.0 + Math.Cos(dtemp)) / 2.0;
@@ -1579,27 +1595,35 @@ namespace StandAloneMD
 														double rp4 = -dt1djk * at2;
 														double rp5 = -dt1dil * at2;
 
-														for (int mm=0; mm<3; mm++)
+														for (int mm = 0; mm < 3; mm++)
 														{
-															double rep = rp1*CJ[mm] + aa*dt2dij[mm];
+															double rep = rp1 * CJ[mm] + aa * dt2dij[mm];
 															RNP[i, mm] = RNP[i, mm] + rep;
 															RNP[jn, mm] = RNP[jn, mm] - rep;
 
 															rep = rp2 * ck[mm] + aa * dt2dik[mm];
 															RNP[i, mm] = RNP[i, mm] + rep;
 															RNP[kn, mm] = RNP[kn, mm] - rep;
-															
+
 															rep = rp3 * cl[mm] + aa * dt2djl[mm];
 															RNP[jn, mm] = RNP[jn, mm] + rep;
 															RNP[ln, mm] = RNP[ln, mm] - rep;
 
-															rep = rp4 * xk[nk-1][mm];
+															rep = rp4 * xk[nk - 1][mm];
 															RNP[jn, mm] = RNP[jn, mm] + rep;
 															RNP[kn, mm] = RNP[kn, mm] - rep;
 
-															rep = rp5 * xl[nl-1][mm];
+															rep = rp5 * xl[nl - 1][mm];
 															RNP[i, mm] = RNP[i, mm] + rep;
 															RNP[ln, mm] = RNP[ln, mm] - rep;
+														}
+
+														{
+															bool flg = checkNaN(RNP);
+															if (flg)
+															{
+																Debugger.Break();
+															}
 														}
 													}
 												}
@@ -1624,17 +1648,25 @@ namespace StandAloneMD
 						double vdrdj = vatt * dradj;
 
 						double rp = vdbdi * xsij + vdbdj * xsji + btot * DEXX1[j];
-						for (int mm=0; mm<3; mm++)
+						for (int mm = 0; mm < 3; mm++)
 						{
 							double rep = rp * CJ[mm];
 							RNP[i, mm] = RNP[i, mm] + rep;
 							RNP[jn, mm] = RNP[jn, mm] - rep;
 						}
 
+						{
+							bool flg = checkNaN(RNP);
+							if (flg)
+							{
+								Debugger.Break();
+							}
+						}
+
 						// add many-body forces /////////////////////////////////////////////////////////////////////////////
 						// I side of bond
 						nk = 0;
-						for (int k=JBEGIN; k<JEND; k++)
+						for (int k = JBEGIN; k < JEND; k++)
 						{
 							if (k != j)
 							{
@@ -1661,7 +1693,7 @@ namespace StandAloneMD
 								// first neighbors
 								double rp1 = vdbdi * (xsik[nk - 1] + dwr * dexni[kk]) + dwr * (vdrdi + vdrdc * cfuni[nk - 1]) + vdbdi * dwr * sdalik;
 								double rp2 = vdbdi * xsjk[nk - 1];
-								for (int mm=0; mm<3; mm++)
+								for (int mm = 0; mm < 3; mm++)
 								{
 									double rep = rp1 * COR[k, mm];
 									RNP[i, mm] = RNP[i, mm] + rep;
@@ -1673,23 +1705,39 @@ namespace StandAloneMD
 									RNP[kn, mm] = RNP[kn, mm] - rep;
 								}
 
+								{
+									bool flg = checkNaN(RNP);
+									if (flg)
+									{
+										Debugger.Break();
+									}
+								}
+
 								// second neighbors via RADIC
 								double ddr = vdrdc * dcfuni[nk - 1] * 2.0 * conk;
 								if (ddr != 0)
 								{
 									int MBEGIN = NABORS[kn];
 									int MEND = NABORS[kn + 1];
-									for (int m = MBEGIN; m<MEND; m++)
+									for (int m = MBEGIN; m < MEND; m++)
 									{
 										int mn = JVCT2B[m];
 										if (mn != kn)
 										{
 											rp = ddr * DWW[m] / RCOR[m];
-											for (int mm=0; mm<3; mm++)
+											for (int mm = 0; mm < 3; mm++)
 											{
 												double rep = rp * COR[m, mm];
 												RNP[kn, mm] = RNP[kn, mm] + rep;
 												RNP[mn, mm] = RNP[mn, mm] - rep;
+											}
+
+											{
+												bool flg = checkNaN(RNP);
+												if (flg)
+												{
+													Debugger.Break();
+												}
 											}
 										}
 									}
@@ -1700,7 +1748,7 @@ namespace StandAloneMD
 
 						// J side of bond
 						nl = 0;
-						for (int l=LBEGIN; l<LEND; l++)
+						for (int l = LBEGIN; l < LEND; l++)
 						{
 							int ln = JVCT2B[l];
 							if (ln != i)
@@ -1727,14 +1775,14 @@ namespace StandAloneMD
 								// first neighbors
 								double rp1 = vdbdj * (xsjl[nl - 1] + dwr * dexnj[kl]) + dwr * (vdrdj + vdrdc * cfunj[nl - 1]) + vdbdj * dwr * sdaljl;
 								double rp2 = vdbdj * xsil[nl - 1];
-								for (int mm = 0; mm<3; mm++)
+								for (int mm = 0; mm < 3; mm++)
 								{
 									double rep = rp1 * COR[l, mm];
 									RNP[jn, mm] = RNP[jn, mm] + rep;
 									RNP[ln, mm] = RNP[ln, mm] - rep;
 
 									// angular forces
-									rep = rp2 * xl[nl-1][mm];
+									rep = rp2 * xl[nl - 1][mm];
 									RNP[i, mm] = RNP[i, mm] + rep;
 									RNP[ln, mm] = RNP[ln, mm] - rep;
 								}
@@ -1745,13 +1793,13 @@ namespace StandAloneMD
 								{
 									int NBEGIN = NABORS[ln];
 									int NEND = NABORS[ln + 1];
-									for (int n=NBEGIN; n<NBEGIN; n++)
+									for (int n = NBEGIN; n < NBEGIN; n++)
 									{
 										int nn = JVCT2B[n];
 										if (nn != ln)
 										{
 											rp = ddr * DWW[n] / RCOR[n];
-											for (int mm=0; mm<3; mm++)
+											for (int mm = 0; mm < 3; mm++)
 											{
 												double rep = rp * COR[n, mm];
 												RNP[ln, mm] = RNP[ln, mm] + rep;
@@ -1896,5 +1944,22 @@ namespace StandAloneMD
 			}
 			return;
 		}
-    }
+    
+		private bool checkNaN (double [,] myArray)
+		{
+			bool flg = false;
+			for (int i = 0; i < myArray.GetLength(0); i++)
+			{
+				for (int j = 0; j < myArray.GetLength(1); j++)
+				{
+					if (double.IsNaN(myArray[i, j]))
+					{
+						Console.WriteLine("Calculated force is NaN!!!");
+						flg = true;
+					}
+				}
+			}
+			return flg;
+		}
+	}
 }
